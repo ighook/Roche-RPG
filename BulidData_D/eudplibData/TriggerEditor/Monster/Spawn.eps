@@ -1,0 +1,48 @@
+import System as sys;
+import Monster.Location as mobloc;
+import Variable as v;
+
+var timer = 0;
+
+//function LocationCheck(loc1: TrgLocation, loc2: TrgLocation);
+
+function Spawn() {
+    if(timer < 80) SetVariables(timer, 1, list(Add));
+    else if(timer == 80) {
+        var ran = dwrand() % mobloc.spawnLocGoblin;
+        setloc("temp", mobloc.locGoblinX[ran], mobloc.locGoblinY[ran]);
+        CreateUnit(1, "Terran Dropship", "temp", P7);
+        if(Bring(P7, Exactly, 1, "Terran Dropship", "Field1")) {
+            RemoveUnitAt(1, "Terran Dropship", "Field1", P7);
+            if(Bring(P8, AtMost, 13, "Zerg Drone", "Field1")) {
+                var mob = sys.SetNextUnitEPD();
+                SetMemoryXEPD(mob + 0x08F / 4, SetTo, 1 << 24, 0xFF000000); // 킬 카운트
+                CreateUnit(1, 41, "temp", P8);
+            }
+        }
+        else if(Bring(P8, Exactly, 1, "Terran Dropship", "Field2")) {
+            RemoveUnitAt(1, "Terran Dropship", "Field1", P7);
+            if(Bring(P7, AtMost, 10, "Zerg Drone", "Field2")) {
+                var mob = sys.SetNextUnitEPD();
+                SetMemoryXEPD(mob + 0x08F / 4, SetTo, 1 << 24, 0xFF000000); // 킬 카운트
+                CreateUnit(1, 41, "temp", P8);
+            }
+        }
+        setcurpl(7);
+        RunAIScriptAt("Set Unit Order To: Junk Yard Dog", "Anywhere");
+        SetVariables(timer, 0);
+    }
+}
+
+/*function LocationCheck(loc1: TrgLocation, loc2: TrgLocation) {
+	const location1 = EPD(0x58DC4C) + loc1 * 5;
+    const location2 = EPD(0x58DC4C) + loc2 * 5;
+    if(MemoryEPD(location1, AtMost, dwread_epd(location2))
+    || MemoryEPD(location1 + 2, AtLeast, dwread_epd(location2 + 2))
+    || MemoryEPD(location1 + 1, AtMost, dwread_epd(location2 + 1))
+    || MemoryEPD(location1 + 3 , AtLeast, dwread_epd(location2 + 3))) {
+        return false;
+    }
+    return true;
+}*/
+

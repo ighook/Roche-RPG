@@ -1,0 +1,89 @@
+import Variable as v;
+import Main as m;
+
+const screen = EUDArray(12);
+const lightTimer = PVariable();
+const light = PVariable();
+
+function ScreenInit() {
+    for(var i = 0; i < 48; i++)
+        screen[i / 4] = dwread_epd(EPD(0x513B68+i));
+}
+
+function ScrollLock() {
+	if(IsUserCP()) {
+		for(var i = 0; i < 48; i+=4) {
+			SetMemory(0x513B68 + i, SetTo, 0);
+		}
+	}
+}
+
+function ScrollUnLock() {
+	if(IsUserCP()) {
+		for(var i = 0; i < 48; i+=4) {
+			SetMemory(0x513B68 + i, SetTo, screen[i / 4]);
+		}
+	}
+}
+
+function SetLight(light_) {
+    const cp = getcurpl();
+    if(light_ > 31 || light_ < 0) return;
+    light[cp] = light_;
+}
+
+function LightCheck() {
+    const cp = getcurpl();
+    if(IsUserCP()) {
+        var currentLight = dwread_epd(EPD(0x657A9C));
+        if(currentLight == light[cp]) return;
+        if(currentLight > light[cp]) {
+            SetMemoryEPD(EPD(0x657A9C), Subtract, 1);
+        }
+        else {
+            SetMemoryEPD(EPD(0x657A9C), Add, 1);
+        }
+    }
+}
+
+function WideCheckStart() {
+    v.s.print("\x07[Screen.eps] \x04와이드 체크");
+    var x1 = dwread_epd(EPD(0x62848C));
+    var y1 = dwread_epd(EPD(0x6284A8));
+    CenterView("temp");
+    var x2 = dwread_epd(EPD(0x62848C));
+    var y2 = dwread_epd(EPD(0x6284A8));
+    var c = dwread_epd(EPD(0x58DC4C) + $L("temp") * 5);
+    if(c - x2 <= 320) {
+        setloc("temp", x1 + 320, y1 + 191);
+        SetMemory(0x58DA00, SetTo, 1);
+    }
+    else {
+        setloc("temp", x1 + 426, y1 + 191);
+        SetMemory(0x58DA00, SetTo, 2);
+    }
+    CenterView("temp");
+}
+
+function WideCheckExec() {
+    const cp = getcurpl();
+    if(v.screen[cp] > 0) {
+        //v.s.print("\x07[Screen.eps] \x04screen : ", v.screen[cp]);
+        if(v.screen[cp] == 1) {
+            if(v.screenMode[cp] != 1) {
+                v.screenMode[cp] = 1;
+            }
+            //v.s.printAt(10, "\x07[Screen.eps] \x04창모드");
+            //(EPD(v.screen) + cp, SetTo, 0);
+        }
+        else if(v.screen[cp] == 2) {
+            if(v.screenMode[cp] != 2) {
+                v.screenMode[cp] = 2;
+            }
+            //v.s.printAt(10, "\x07[Screen.eps] \x04와이드");
+        }
+        v.screen[cp] = 0;
+        SetMemoryEPD(EPD(0x58DA00), SetTo, 0);
+    }
+    //v.s.print("\x07[Screen.eps] \x04", v.screen[cp]);
+}

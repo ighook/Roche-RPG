@@ -1,0 +1,28 @@
+import Inventory as inven;
+import User.Info as user;
+
+// SCA에 저장할 배열
+const userSlot = EUDArray(5 * 8); // 레벨 1바이트, 직업 4비트, 플레이 시간 2바이트
+const userInven = EUDArray(24 * 8); // 인벤토리 저장
+const userQuest = EUDArray(30 * 8);
+const userSkillSlot = EUDArray(2 * 8);
+//const userSkill = EUDArray(skill.slot * 8);
+
+function SaveUserSlot() {
+	const cp = getcurpl();
+	var info = user.level[cp] * py_pow(10, 6) + user.job[cp] * py_pow(10, 5) + user.playTimeHour[cp] * py_pow(10, 2) + user.playTimeMin[cp];
+	userSlot[cp * 5 + user.currentSlot[cp] - 1] = info;
+}
+
+function SaveUserInven() {
+	const cp = getcurpl();
+	const t = 24 * cp;
+	for(var i = 0; i < 24; i++) {
+		const c = inven.Inven.cast(inven.inven[t + i]);
+		if(c.type != 0) {
+			var info = c.type * py_pow(10, 6) + c.index * py_pow(10, 3) + c.amount;
+			userInven[t + i] = info;
+		}
+	}
+}
+

@@ -1,0 +1,51 @@
+import Variable as v;
+
+// const treeLocX = EUDArray(100);
+// const treeLocY = EUDArray(100);
+
+function CreateTree() {
+    /*var temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Terran Marine", "Anywhere")'));
+    setloc("temp", 0, 0);
+    for(var i = 0; i < temp; i++) {
+        MoveLocation("temp", 0, P7, 64);
+        RemoveUnitAt(1, 0, "temp", P7);
+        var treeForm = dwrand() % 4;
+        switch(treeForm) {
+            case 0:
+                wwrite(0x665AC0 + 1696 + 493 * 2, 624);
+                break;
+            case 1:
+                wwrite(0x665AC0 + 1696 + 493 * 2, 634);
+                break;
+            case 2:
+                wwrite(0x665AC0 + 1696 + 493 * 2, 638);
+                break;
+            case 3:
+                wwrite(0x665AC0 + 1696 + 493 * 2, 630);
+                break;
+        }
+        CreateUnit(1, 124, "temp", P7);
+        // treeLocX[i] = dwread_epd(EPD(0x58DC4C) + $L("temp") * 5);
+        // treeLocY[i] = dwread_epd(EPD(0x58DC4C) + $L("temp") * 5 + 1);
+        // v.s.print(treeLocX[i], " ", treeLocY[i]);
+    }*/
+   
+    wwrite(0x665AC0 + 1696 + 493 * 2, 624);
+    CreateUnit(1, "Cave", "t", P7);
+
+    wwrite(0x665AC0 + 1696 + 493 * 2, 634);
+    addloc("t2", -17, 0);
+    CreateUnit(1, "Cave", "t2", P7);
+
+    addloc("t3", -16, 0);
+    wwrite(0x665AC0 + 1696 + 493 * 2, 638);
+    CreateUnit(1, "Cave", "t3", P7);
+
+    addloc("t4", -7, 9);
+    wwrite(0x665AC0 + 1696 + 493 * 2, 630);
+    CreateUnit(1, "Cave", "t4", P7);
+}
+
+function CreateTree01() {
+    
+}

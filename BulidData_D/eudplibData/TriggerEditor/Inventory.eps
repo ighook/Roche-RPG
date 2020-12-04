@@ -1,0 +1,466 @@
+import System as sys;
+import Variable as v;
+import User.Info as user;
+import Option as option;
+import Screen as screen;
+import Item.Manager as item;
+import Equip as equip;
+
+object Inven { var type; var index; var lv; var name; var amount; var explain; var value1; var value2; };
+
+const inven = EUDArray(24 * 8);
+const page = PVariable();
+const curPage = PVariable();
+const color = EUDArray(6);
+const mousePosition = PVariable();
+const type = PVariable();
+
+const showType = PVariable();
+const showIndex = PVariable();
+const showLevel = PVariable();
+const showName = PVariable();
+const showAmount = PVariable();
+const showThrowAmount = PVariable();
+const showValue1 = PVariable();
+const showValue2 = PVariable();
+
+function Open();
+function Close();
+function Back();
+function PageCheck();
+function SelectSlot(slot);
+function Sort();
+function ChangeSelectColorMain();
+function ChangeSelectColorPotion();
+function ChangeSelectColorEquip();
+function ClickMinus1();
+function ClickMinus10();
+function ClickPlus1();
+function ClickPlus10();
+function RegisterPotion();
+
+function Inventory() {
+    const cp = getcurpl();
+    const t = 24 * cp;
+    // Toggle
+    if(v.key[cp] == v.KeyI) {
+        if(user.openedInven[cp] == 0) Open();
+        else Close();
+    }
+ 
+    if(user.openedInven[cp] == 1) {
+        if(type[cp] == 0) {
+            if(v.textRefresh[cp] == 1) {
+                v.textRefresh[cp] = 0;
+                const inven1 = Inven.cast(inven[t + page[cp] + 0]);
+                const inven2 = Inven.cast(inven[t + page[cp] + 1]);
+                const inven3 = Inven.cast(inven[t + page[cp] + 2]);
+                const inven4 = Inven.cast(inven[t + page[cp] + 3]);
+                const inven5 = Inven.cast(inven[t + page[cp] + 4]);
+                const inven6 = Inven.cast(inven[t + page[cp] + 5]);
+                v.display.insert(0);
+                v.display.append("   \x07▶ \x04인벤토리\n");
+                v.display.append("    \x19·  \x16(1)  ", ptr2s(color[0]), ptr2s(inven1.name), "  \x19[", inven1.amount, " 개]\n");
+                v.display.append("    \x19·  \x16(2)  ", ptr2s(color[1]), ptr2s(inven2.name), "  \x19[", inven2.amount, " 개]\n");
+                v.display.append("    \x19·  \x16(3)  ", ptr2s(color[2]), ptr2s(inven3.name), "  \x19[", inven3.amount, " 개]\n");
+                v.display.append("    \x19·  \x16(4)  ", ptr2s(color[3]), ptr2s(inven4.name), "  \x19[", inven4.amount, " 개]\n");
+                v.display.append("    \x19·  \x16(5)  ", ptr2s(color[4]), ptr2s(inven5.name), "  \x19[", inven5.amount, " 개]\n");
+                v.display.append("    \x19·  \x16(6)  ", ptr2s(color[5]), ptr2s(inven6.name), "  \x19[", inven6.amount, " 개]\n");
+                if(curPage[cp] == 1) v.display.append("    \x19·  \x0e[1] \x1e[2] \x1e[3] \x1e[4]    \x04", user.gold[cp], " \x17G\n");
+                else if(curPage[cp] == 2) v.display.append("    \x19·  \x1e[1] \x0e[2] \x1e[3] \x1e[4]    \x04", user.gold[cp], " \x17G\n");
+                else if(curPage[cp] == 3) v.display.append("    \x19·  \x1e[1] \x1e[2] \x0e[3] \x1e[4]    \x04", user.gold[cp], " \x17G\n");
+                else if(curPage[cp] == 4) v.display.append("    \x19·  \x1e[1] \x1e[2] \x1e[3] \x0e[4]    \x04", user.gold[cp], " \x17G\n");
+            }
+            v.display.DisplayAt(0);
+            ChangeSelectColorMain();
+            if(v.key[cp] == 128 || v.key[cp] == 256) {
+                if(v.key[cp] == 128 && curPage[cp] > 1) {
+                    curPage[cp] -= 1;
+                    PageCheck();
+                }
+                else if(v.key[cp] == 256 && curPage[cp] < 4) {
+                    curPage[cp] += 1;
+                    PageCheck();
+                }
+            }
+            
+            if(v.numberKey[cp] > 0 && v.numberKey[cp] < 7) {
+                SelectSlot(v.numberKey[cp]);
+            }
+
+            if(v.mouse[cp] == 1) {
+                if(v.mouseX[cp] < 20 || v.mouseX[cp] > 242) return;
+                if(v.mouseY[cp] < 128 || v.mouseY[cp] > 220) return;
+                for(var i = 0; i < 5; i++) {
+                    if(sys.clickedLine(i + 1)) {
+                        SelectSlot(i + 1);
+                        break;
+                    }
+                }
+            }
+        }
+        else if(type[cp] == 1) {
+            if(v.textRefresh[cp] == 1) {
+                v.textRefresh[cp] = 0;
+                v.display.insert(0);
+                v.display.append("   \x07▶ \x04인벤토리\n");
+                v.display.append("    \x19·  \x1d이름 \x04: ", ptr2s(showName[cp]), "\n");
+                v.display.append("    \x19·  \x1d보유 \x04: ", showAmount[cp], "   \x1d회복량 \x04: ", showValue1[cp],"\n");
+                v.display.append("    \x19·  \x1d버릴 개수 \x04: \x04", showThrowAmount[cp], "\n    \x19·  \x15▼\x04-1   \x15▼\x04-10   \x15▲\x04+1   \x15▲\x04+10\n");
+                v.display.append("    \x19·  ", ptr2s(color[0]), "\x04(1)  ", ptr2s(color[0]), "단축키 등록\n");
+                v.display.append("    \x19·  ", ptr2s(color[1]), "\x04(2)  ", ptr2s(color[1]), "버리기\n");
+                v.display.append("    \x19·  ", ptr2s(color[2]), "\x04(3)  ", ptr2s(color[2]), "뒤로 가기");
+            }
+            v.display.DisplayAt(0);
+            ChangeSelectColorPotion();
+            if(v.mouse[cp] == 1) {
+                if(v.mouseY[cp] < 174 || v.mouseY[cp] > 238) return;
+                if(v.mouseX[cp] < 35) return;
+                if(sys.clickedLine(4)) {
+                    if(v.mouseX[cp] > 187) return;
+                    if(v.mouseX[cp] <= 60) ClickMinus1();
+                    else if(v.mouseX[cp] >= 71 && v.mouseX[cp] <= 105) ClickMinus10();
+					else if(v.mouseX[cp] >= 115 && v.mouseX[cp] <= 141) ClickPlus1();
+					else if(v.mouseX[cp] >= 153 && v.mouseX[cp] <= 187) ClickPlus10();
+                }
+                else if(sys.clickedLine(5)) RegisterPotion();
+                else if(sys.clickedLine(6)) {
+                    if(v.mouseX[cp] <= 91) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        if(showAmount[cp] >= showThrowAmount[cp]) {
+                            item.RemoveItem(showType[cp], showIndex[cp], showThrowAmount[cp]);
+                            showAmount[cp] -= showThrowAmount[cp];
+                            if(showThrowAmount[cp] > showAmount[cp]) showThrowAmount[cp] = showAmount[cp];
+                            if(showIndex[cp] <= 15 && showIndex[cp] == user.useHPPtn[cp]) user.remainHPPtn[cp] = showAmount[cp];
+                            else if(showIndex[cp] == user.useMPPtn[cp]) user.remainMPPtn[cp] = showAmount[cp];
+                            if(showAmount[cp] == 0) Back();
+                            v.textRefresh[cp] = 1;
+                        }
+                    }
+                }
+                else if(sys.clickedLine(7)) {           
+                    if(v.mouseX[cp] <= 105) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        Back();
+                    }
+                }
+            }
+        }
+        else if(type[cp] == 2 || type[cp] == 3) {
+            if(v.textRefresh[cp] == 1) {
+                v.textRefresh[cp] = 0;
+                v.display.insert(0);
+                v.display.append("   \x07▶ \x04인벤토리\n");
+                v.display.append("    \x19·  \x1d이름 \x04: ", ptr2s(showName[cp]), "\n");
+                v.display.append("    \x19·  \x1d보유 \x04: ", showAmount[cp], " 개\n");
+                v.display.append("    \x19·  \x1d레벨 제한 \x04: ", showLevel[cp], "\n");
+                if(showType[cp] == 2)
+                    v.display.append("    \x19·  \x1d공격력 \x04: ", showValue1[cp], "\n");
+                else if(showType[cp] == 3)
+                    v.display.append("    \x19·  \x1d방어력 \x04: ", showValue1[cp], "\n");
+                v.display.append("    \x19·  ", ptr2s(color[0]), "\x04(1)  ", ptr2s(color[0]), "장착하기\n");
+                v.display.append("    \x19·  ", ptr2s(color[1]), "\x04(2)  ", ptr2s(color[1]), "버리기\n");
+                v.display.append("    \x19·  ", ptr2s(color[2]), "\x04(3)  ", ptr2s(color[2]), "뒤로 가기");
+            }
+            v.display.DisplayAt(0);
+            ChangeSelectColorEquip();
+            if(v.mouse[cp] == 1) {
+                if(v.mouseY[cp] < 174 || v.mouseY[cp] > 238) return;
+                if(v.mouseX[cp] < 35) return;
+                if(sys.clickedLine(5)) {
+                    if(v.mouseX[cp] <= 116) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        if(showType[cp] == 2) equip.EquipWeapon(showIndex[cp]);
+                        else if(showType[cp] == 3) equip.EquipArmor(showIndex[cp]);
+                        Back();
+                    }
+                }
+                else if(sys.clickedLine(6)) {
+                    if(v.mouseX[cp] <= 91) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        item.RemoveItem(showType[cp], showIndex[cp], showThrowAmount[cp]);
+                        showAmount[cp] -= 1;
+                        if(showAmount[cp] == 0) Back();
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+                else if(sys.clickedLine(7)) {
+                    if(v.mouseX[cp] <= 105) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        Back();
+                    }
+                }
+            }
+        }
+    }
+}
+
+function ResetInven() {
+    const cp = getcurpl();
+    const t = cp * 24;
+    for(var i = 0; i < 24; i++) {
+		inven[t + i] = Inven.alloc();
+		const c = Inven.cast(inven[t + i]);
+		c.name = Db("\x05Empty");
+	}
+}
+
+function Open() {
+    const cp = getcurpl();
+    if(user.inConv[cp] == 1) return;
+    sys.CloseWindow();
+    if(IsUserCP()) {
+        for(var i = 0; i < 6; i++)
+            color[i] = Db("\x05");
+    }
+    if(option.keepPage[cp] == 0) curPage[cp] = 1;
+    PageCheck(); 
+    user.openedInven[cp] = 1;
+    screen.SetLight(25);
+    v.textRefresh[cp] = 1;
+}
+
+function Close() {
+    const cp = getcurpl();
+    user.openedInven[cp] = 0;
+    type[cp] = 0;
+    screen.SetLight(31);
+    sys.TextClear();
+}
+
+function SelectSlot(slot) {
+    const cp = getcurpl();
+    const t = 24 * cp;
+    const c = Inven.cast(inven[t + page[cp] + slot - 1]);
+    if(c.type == 0) return;
+    sys.TextClear();
+    if(c.type == 1) {
+        showValue1[cp] = c.value1;
+    }
+    else if(c.type == 2) {
+        showLevel[cp] = c.lv;
+    }
+    else if(c.type == 3) {
+        showValue1[cp] = c.value1;
+        showLevel[cp] = c.lv;
+    }
+    showType[cp] = c.type;
+    showIndex[cp] = c.index;
+    showName[cp] = c.name;
+    showAmount[cp] = c.amount;
+    showThrowAmount[cp] = 1;
+    type[cp] = c.type;
+    v.textRefresh[cp] = 1;
+    if(IsUserCP()) {
+        for(var i = 0; i < 6; i++) {
+            color[i] = Db("\x05");
+        }
+    }
+    PlayWAV("staredit\\wav\\click2.ogg");
+}
+
+function Back() {
+    const cp = getcurpl();
+    showType[cp] = 0;
+    showIndex[cp] = 0;
+    showName[cp] = 0;
+    showAmount[cp] = 0;
+    showThrowAmount[cp] = 0;
+    type[cp] = 0;
+    sys.TextClear();
+    v.textRefresh[cp] = 0;
+}
+
+function PageCheck() {
+	const cp = getcurpl();
+	if(curPage[cp] == 1) page[cp] = 0;
+	else if(curPage[cp] == 2) page[cp] = 6;
+	else if(curPage[cp] == 3) page[cp] = 12;
+	else if(curPage[cp] == 4) page[cp] = 18;
+    mousePosition[cp] = 0;
+	v.textRefresh[cp] = 1;
+}
+
+function Sort() {
+	const cp = getcurpl();
+	const t = 24 * cp;
+	for(var i = 0; i < 23; i++) {
+		const c1 = Inven.cast(inven[t + i]);
+		const c2 = Inven.cast(inven[t + i + 1]);
+		if(c1.type == 0 && c2.type != 0) {
+			c1.type = c2.type;
+			c1.index = c2.index;
+			c1.name = c2.name;
+			c1.amount = c2.amount;
+			c1.explain = c2.explain;
+            c1.value1 = c2.value1;
+			c2.type = 0;
+			c2.index = 0;
+			c2.name = Db("\x05Empty");
+			c2.amount = 0;
+			c2.explain = 0;
+            c2.value1 = 0;
+		}
+	}
+}
+
+function ChangeSelectColorMain() {
+    const cp = getcurpl();
+    if(IsUserCP()) {
+        if(v.isMouseMoved[cp] == 1) {
+            v.isMouseMoved[cp] = 0;
+            var c = 0;
+            if(v._mouseX[cp] > 20 && v._mouseX[cp] < 242)  {
+                c = 1;
+                if(v._mouseY[cp] < 128 || v._mouseY[cp] > 222) {
+                    mousePosition[cp] = 0;
+                }
+            }
+            else mousePosition[cp] = 0;
+            
+            for(var i = 0; i < 6; i++) {
+                if(c == 1 && v._mouseY[cp] >= 128 + 16 * i && v._mouseY[cp] <= 142 + 16 * i) {
+                    if(mousePosition[cp] != i + 1) {
+                        color[i] = Db("\x17");
+                        mousePosition[cp] = i + 1;
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+                else {
+                    if(strcmp(color[i], Db("\x17")) == 0) {
+                        color[i] = Db("\x05");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+function ChangeSelectColorPotion() {
+    const cp = getcurpl();
+    if(IsUserCP()) {
+        var c = 0;
+        if(v._mouseX[cp] > 20 && v._mouseX[cp] < 116)  {
+            c = 1;
+            if(v._mouseY[cp] < 192 || v._mouseY[cp] > 238) {
+                mousePosition[cp] = 0;
+            }
+        }
+        else mousePosition[cp] = 0;
+        
+        for(var i = 0; i < 3; i++) {
+            if(c == 1 && v._mouseY[cp] >= 192 + 16 * i && v._mouseY[cp] <= 206 + 16 * i) {
+                if(mousePosition[cp] != i + 1) {
+                    color[i] = Db("\x17");
+                    mousePosition[cp] = i + 1;
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else {
+                if(strcmp(color[i], Db("\x17")) == 0) {
+                    color[i] = Db("\x05");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+        }
+    }
+}
+
+function ChangeSelectColorEquip() {
+    const cp = getcurpl();
+    if(IsUserCP()) {
+        if(v.isMouseMoved[cp] == 1) {
+            v.isMouseMoved[cp] = 0;
+            var c = 0;
+            if(v._mouseX[cp] > 20 && v._mouseX[cp] < 104)  {
+                c = 1;
+                if(v._mouseY[cp] < 192 || v._mouseY[cp] > 222) {
+                    mousePosition[cp] = 0;
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else {
+                mousePosition[cp] = 0;
+                v.textRefresh[cp] = 1;
+            }
+            
+            for(var i = 0; i < 3; i++) {
+                if(c == 1 && v._mouseY[cp] >= 192 + 16 * i && v._mouseY[cp] <= 206 + 16 * i) {
+                    if(mousePosition[cp] != i + 1) {
+                        color[i] = Db("\x17");
+                        mousePosition[cp] = i + 1;
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+                else if(strcmp(color[i], Db("\x17")) == 0) {
+                    color[i] = Db("\x05");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+        }
+    }
+}
+
+function ClickMinus1() {
+    const cp = getcurpl();
+    PlayWAV("staredit\\wav\\click2.ogg");
+    if(showThrowAmount[cp] > 1) {
+        showThrowAmount[cp] -= 1;
+        v.textRefresh[cp] = 1;
+    }
+}
+
+function ClickMinus10() {
+    const cp = getcurpl();
+    PlayWAV("staredit\\wav\\click2.ogg");
+    if(showThrowAmount[cp] > 10) {
+        showThrowAmount[cp] -= 10;
+        v.textRefresh[cp] = 1;
+    }
+    else {
+        showThrowAmount[cp] = 1;
+        v.textRefresh[cp] = 1;
+    }
+}
+
+function ClickPlus1() {
+    const cp = getcurpl();
+    PlayWAV("staredit\\wav\\click2.ogg");
+    if(showThrowAmount[cp] < 99 && showThrowAmount[cp] < showAmount[cp]) {
+        showThrowAmount[cp] += 1;
+        v.textRefresh[cp] = 1;
+    }
+}
+
+function ClickPlus10() {
+    const cp = getcurpl();
+    PlayWAV("staredit\\wav\\click2.ogg");
+    if(showThrowAmount[cp] < 90 && showAmount[cp] > 10 && showThrowAmount[cp] <= (showAmount[cp] - 10)) {
+        showThrowAmount[cp] += 10;
+        v.textRefresh[cp] = 1;
+    }
+    else {
+        showThrowAmount[cp] = showAmount[cp];
+        v.textRefresh[cp] = 1;
+    }
+}
+
+function RegisterPotion() {
+    const cp = getcurpl();
+    if(v.mouseX[cp] <= 115) {
+        PlayWAV("staredit\\wav\\click2.ogg");
+        if(showIndex[cp] < 15) {
+            user.useHPPtn[cp] = showIndex[cp];
+            user.recoveryHPPtn[cp] = showValue1[cp];
+            user.remainHPPtn[cp] = showAmount[cp];
+            v.s.printAt(10, "\x17인덱스 \x04: ", showIndex[cp], "  \x17이름 \x04: ", ptr2s(showName[cp]), "  \x17회복량 \x04: ", showValue1[cp]);
+        }
+        else {
+            user.useMPPtn[cp] = showIndex[cp];
+            user.recoveryMPPtn[cp] = showValue1[cp];
+            user.remainMPPtn[cp] = showAmount[cp];
+            v.s.printAt(10, "\x17인덱스 \x04: ", showIndex[cp], "  \x17이름 \x04: ", ptr2s(showName[cp]), "  \x17회복량 \x04: ", showValue1[cp]);
+        }
+    }
+}

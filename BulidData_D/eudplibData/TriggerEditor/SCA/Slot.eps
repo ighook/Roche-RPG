@@ -1,0 +1,175 @@
+import Variable as v;
+import User.Info as user;
+import System as sys;
+import SCA.Data as data;
+import Opening as opening;
+import Potal as potal;
+import Screen as screen;
+
+const color = EUDArray(6);
+const mousePosition = PVariable();
+const selectedSlot = PVariable();
+const hour = EUDArray(5 * 8);
+
+function Close();
+
+function New() {
+    const cp = getcurpl();
+    if(user.openedSlot[cp] == 1) {
+        if(v.textRefresh[cp] == 1) {
+            v.textRefresh[cp] = 0;
+            v.display.insert(0);
+            v.display.append("\n\x13\x04=============================\n");
+            v.display.append("\x13", ptr2s(color[0]), "Lv.", user.slotLevel[5 * cp + 0], "     플레이 시간 : ", hour[5 * cp + 0], " h\n");
+            v.display.append("\x13", ptr2s(color[1]), "Lv.", user.slotLevel[5 * cp + 1], "     플레이 시간 : ", hour[5 * cp + 1], " h\n");
+            v.display.append("\x13", ptr2s(color[2]), "Lv.", user.slotLevel[5 * cp + 2], "     플레이 시간 : ", hour[5 * cp + 2], " h\n");
+            v.display.append("\x13", ptr2s(color[3]), "Lv.", user.slotLevel[5 * cp + 3], "     플레이 시간 : ", hour[5 * cp + 3], " h\n");
+            v.display.append("\x13", ptr2s(color[4]), "Lv.", user.slotLevel[5 * cp + 4], "     플레이 시간 : ", hour[5 * cp + 4], " h\n");
+            v.display.append("\x13\x04=============================\n");
+            v.display.append("\x13", ptr2s(color[5]), "새로하기");
+        }
+
+        v.display.DisplayAt(0);
+        sys.Stop();
+
+        if(IsUserCP()) {
+            if(v._mouseY[cp] < 160 || v._mouseY[cp] > 222) {
+                mousePosition[cp] = 0;
+                v.textRefresh[cp] = 1;
+            }
+
+            if(v._mouseY[cp] >= 144 && v._mouseY[cp] <= 158) {
+                if(selectedSlot[cp] != 1) {
+                    if(strcmp(color[0], Db("\x05")) == 0) {
+                        color[0] = Db("\x04");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            else if(selectedSlot[cp] != 1 && strcmp(color[0], Db("\x05")) != 0)  {
+                color[0] = Db("\x05");
+                v.textRefresh[cp] = 1;
+            }
+
+            if(v._mouseY[cp] >= 160 && v._mouseY[cp] <= 174) {
+                if(selectedSlot[cp] != 2) {
+                    if(strcmp(color[1], Db("\x05")) == 0) {
+                        color[1] = Db("\x04");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            else if(selectedSlot[cp] != 2 && strcmp(color[1], Db("\x05")) != 0)  {
+                color[1] = Db("\x05");
+                v.textRefresh[cp] = 1;
+            }
+            
+            if(v._mouseY[cp] >= 176 && v._mouseY[cp] <= 190) {
+                if(selectedSlot[cp] != 3) {
+                    if(strcmp(color[2], Db("\x05")) == 0) {
+                        color[2] = Db("\x04");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            else if(selectedSlot[cp] != 3 && strcmp(color[2], Db("\x05")) != 0) {
+                color[2] = Db("\x05");
+                v.textRefresh[cp] = 1;
+            }
+            
+            if(v._mouseY[cp] >= 192 && v._mouseY[cp] <= 206) {
+                if(selectedSlot[cp] != 4) {
+                    if(strcmp(color[3], Db("\x05")) == 0) {
+                        color[3] = Db("\x04");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            else if(selectedSlot[cp] != 4 && strcmp(color[3], Db("\x05")) != 0) {
+                color[3] = Db("\x05");
+                v.textRefresh[cp] = 1;
+            }
+            
+            if(v._mouseY[cp] >= 208 && v._mouseY[cp] <= 222) {
+                if(selectedSlot[cp] != 5) {
+                    if(strcmp(color[4], Db("\x05")) == 0) {
+                        color[4] = Db("\x04");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            else if(selectedSlot[cp] != 5 && strcmp(color[4], Db("\x05")) != 0) {
+                color[4] = Db("\x05");
+                v.textRefresh[cp] = 1;
+            }
+        }
+
+        if(user.deathSCV[cp] == 1) {
+            if(sys.clickedLine(2)) {
+                PlayWAV("staredit/wav/click2.ogg");
+                selectedSlot[cp] = 1;
+                if(IsUserCP()) {
+                    color[0] = Db("\x1f");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else if(sys.clickedLine(3)) {
+                PlayWAV("staredit/wav/click2.ogg");
+                selectedSlot[cp] = 2;
+                if(IsUserCP()) {
+                    color[1] = Db("\x1f");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else if(sys.clickedLine(4)) {
+                PlayWAV("staredit/wav/click2.ogg");
+                selectedSlot[cp] = 3;
+                if(IsUserCP()) {
+                    color[2] = Db("\x1f");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else if(sys.clickedLine(5)) {
+                PlayWAV("staredit/wav/click2.ogg");
+                selectedSlot[cp] = 4;
+                if(IsUserCP()) {
+                    color[3] = Db("\x1f");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else if(sys.clickedLine(6)) {
+                PlayWAV("staredit/wav/click2.ogg");
+                selectedSlot[cp] = 5;
+                if(IsUserCP()) {
+                    color[4] = Db("\x1f");
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else if(sys.clickedLine(8) && selectedSlot[cp] != 0) {
+                opening.step[cp] = 6;
+                screen.SetLight(25);
+                potal.Move(potal.potal[0], potal.potal[1], 2);
+                Close();
+            }
+        }
+    }
+}
+
+function Open() {
+    const cp = getcurpl();
+    user.openedSlot[cp] = 1;
+    selectedSlot[cp] = 1;
+    mousePosition[cp] = 0;
+    v.textRefresh[cp] = 1;
+    if(IsUserCP()) {
+        color[0] = Db("\x1f");
+        for(var i = 1; i < 6; i++)
+            color[i] = Db("\x05");
+    }
+}
+
+function Close() {
+    const cp = getcurpl();
+    user.openedSlot[cp] = 0;
+    sys.TextClear();
+}

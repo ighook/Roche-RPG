@@ -1,0 +1,34 @@
+[main]
+input: ..\..\D.scx
+output: ..\..\..\..\..\..\Documents\StarCraft\Maps\Download\!E.scx
+[DataEditor.py]
+[ExtraDataEditor.py]
+[dataDumper]
+..\temp\custom_txt.tbl : 0x6D5A30, copy
+
+[TriggerEditor\Main.eps]
+[TriggerEditor\Data.eps]
+
+[MSQC]
+MSQCSpecial.Exactly(1) : MSQCSpecialBuffer, 100
+MSQCSpecial.Exactly(2) : MSQCSpecialBuffer, 200
+MSQCSpecial.Exactly(3) : MSQCSpecialBuffer, 300
+MSQCSpecial.Exactly(4) : MSQCSpecialBuffer, 400
+MSQCCondiction.Exactly(1) ; xy , MSQCValue : MSQCBuffer
+MouseDown(L) : mouseClick, 1
+MouseDown(L); val, 0x6CDDC4 : Zerg Overlord
+MouseDown(L); val, 0x6CDDC8 : Yggdrasill (Overlord)
+NotTyping; KeyDown(C) : KeyC, 1
+NotTyping; KeyDown(I) : KeyI, 1
+NotTyping; KeyUp(LALT) : KeyALT, 1
+0x58DA00, Exactly, 1 : screen, 1
+0x58DA00, Exactly, 2 : screen, 2
+[chatEvent]
+__Addr__ : 0x58D900
+__ptrAddr__ : 0x58D904
+__patternAddr__ : 0x58D908
+__lenAddr__ : 0x58D90C
+
+
+[eudTurbo]
+

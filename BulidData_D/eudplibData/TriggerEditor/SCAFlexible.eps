@@ -1,0 +1,221 @@
+import SCA.Data as n0;
+
+const ws = Db(2528);//workspace
+const EntryPointLength = 8;//EntryPointLength
+const SpaceLength = 300;//DataBufferSize
+const ObjectCount = 4;//ObjectCount
+
+function Init(){
+    MPQAddFile('SCARCHIVEMAPCODE', py_open('scakeyfile', 'rb').read());
+    MPQAddFile('SCARCHIVEDATA', py_open('scadatafile', 'rb').read());
+    //EntryPoint
+    dwwrite_epd(EPD(ws) + 0, 1685628776);
+    dwwrite_epd(EPD(ws) + 1, 1835243690);
+    dwwrite_epd(EPD(ws) + 2, 3316698172);
+    dwwrite_epd(EPD(ws) + 3, 2946104519);
+    dwwrite_epd(EPD(ws) + 4, 3579045751);
+    dwwrite_epd(EPD(ws) + 5, 2291179255);
+    dwwrite_epd(EPD(ws) + 6, 2787191351);
+    dwwrite_epd(EPD(ws) + 7, 2479588178);
+    
+}
+
+
+function Exec(){
+    Init();
+}
+
+
+function ResetValue(tagNum, index){
+    const cp = getcurpl();
+    switch(tagNum){
+    case 0:
+    {
+        n0.level[cp] = 0;
+        break;
+    }
+    case 1:
+    {
+        const alen = n0.userSlot.length / 8;
+        for(var i = 0 ; i < alen; i++){
+            n0.userSlot[alen * cp + i] = 0;
+        }
+        break;
+    }
+    case 2:
+    {
+        n0.exp[cp] = 0;
+        break;
+    }
+    case 3:
+    {
+        n0.gold[cp] = 0;
+        break;
+    }
+    }
+}
+
+
+function SaveValue(tagNum, Value, index){
+    const cp = getcurpl();
+    switch(tagNum){
+    case 0:
+    {
+        n0.level[cp] = Value;
+        break;
+    }
+    case 1:
+    {
+        const alen = n0.userSlot.length / 8;
+        n0.userSlot[alen * cp + index] = Value;
+        break;
+    }
+    case 2:
+    {
+        n0.exp[cp] = Value;
+        break;
+    }
+    case 3:
+    {
+        n0.gold[cp] = Value;
+        break;
+    }
+    }
+}
+
+
+function SaveDataWriteValue(tagNum, BaseAddress, index){
+    const cp = getcurpl();
+    switch(tagNum){
+    case 0:
+        {
+        const objValue = n0.level[cp];
+        if(objValue != 0){
+            if (objValue > 0xFFFF){
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x1000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue / 0x10000);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue % 0x10000);
+                index++;
+             }else{
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x2000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue);
+                index++;
+             }
+         }
+        }
+        break;
+    case 1:
+        {
+        const alen = n0.userSlot.length / 8;
+        for(var i = 0 ; i < alen ; i ++){
+            const objValue = n0.userSlot[alen * cp + i];
+            if(objValue != 0){
+                if (objValue > 0xFFFF){
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x3000 + tagNum);
+                    index++;
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, i);
+                    index++;
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue / 0x10000);
+                    index++;
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue % 0x10000);
+                    index++;
+                 }else{
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x4000 + tagNum);
+                    index++;
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, i);
+                    index++;
+                    wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue);
+                    index++;
+                 }
+            }
+        }
+        }
+        break;
+    case 2:
+        {
+        const objValue = n0.exp[cp];
+        if(objValue != 0){
+            if (objValue > 0xFFFF){
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x1000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue / 0x10000);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue % 0x10000);
+                index++;
+             }else{
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x2000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue);
+                index++;
+             }
+         }
+        }
+        break;
+    case 3:
+        {
+        const objValue = n0.gold[cp];
+        if(objValue != 0){
+            if (objValue > 0xFFFF){
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x1000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue / 0x10000);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue % 0x10000);
+                index++;
+             }else{
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x2000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue);
+                index++;
+             }
+         }
+        }
+        break;
+    }
+    
+    return index;
+}
+
+
+function LoadDataReadValue(BaseAddress, i){
+   	const indicator = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   	
+   	if (indicator != 0){
+   		const spec = indicator / 0x1000;
+   		const ObjNum = indicator % 0x1000;
+   		var vindex = 0;
+   		var value = 0;
+   		if (spec == 1){
+   			//4바이트 지정
+   			i++;
+   			const value1 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			const value2 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			value = value1 * 0x10000 + value2;
+   		}else if (spec == 2){
+   			//2바이트 지정
+   			i++;
+   			value = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   		}else if (spec == 3){
+   			//4바이트 지정
+   			i++;
+   			vindex = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			const value1 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			const value2 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			value = value1 * 0x10000 + value2;
+   		}else if (spec == 4){
+   			//2바이트 지정
+   			i++;
+   			vindex = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			value = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   		}
+   		SaveValue(ObjNum, value, vindex);
+   	}
+   	return i;
+}

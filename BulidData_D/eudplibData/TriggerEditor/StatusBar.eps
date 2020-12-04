@@ -1,0 +1,89 @@
+import TriggerEditor.SCArchive as sca;
+import User.Info as user;
+import Variable as v;
+import SCA.Slot as slot;
+import Opening as open;
+import MSQCVariable as mv;
+
+const stats = PVariable();
+const timer = PVariable();
+
+const USER_STATUS = 1;
+const SCA_ERROR = 2;
+const SAVE_START = 3;
+const SAVE_END = 4;
+const SAVE = 5;
+const SAVE_DENY = 6;
+const LOADING = 7;
+const LOAD_END = 8;
+const LOAD_GLOBAL = 9;
+const SCA_WAIT = 10;
+
+function StatusBar() {
+    const cp = getcurpl();
+    switch(stats[cp]) {
+        case 0:
+            eprintln(" ");
+            break;
+        case USER_STATUS:
+            eprintln("\x17X \x04: ", v.mouseX[cp], "  \x17Y \x04: ", v.mouseY[cp], "  ", slot.mousePosition[cp]);
+            //eprintln(dwread_epd(EPD(v.KeyD) + cp), " ", dwread_epd(EPD(v.KeyF) + cp));
+            //eprintln(open.elapsedTime[0], " ", open.elapsedTime[1]);
+            //eprintln("screen : ", dwread_epd(EPD(v.screen) + cp), "  screenMode : ", v.screenMode[cp], 
+            //"  0x58DA00 : ", dwread_epd(EPD(0x58DA00)));
+            //eprintln(dwread_epd(EPD(v.chatAddr)), "  ", dwread_epd(EPD(v.chatPattern)), "  ", dwread_epd(EPD(v.chatLen) + cp));
+            break;
+        case SCA_ERROR:
+            eprintln("\x07[SCA] \x08연결이 되어있지않습니다");
+            timer[cp] += 1;
+            if(timer[cp] == 50) {
+                timer[cp] = 0;
+                stats[cp] = USER_STATUS;
+            }
+            break;
+        case SAVE_START:
+            eprintln("\x07[SCA] \x04저장 완료 문구가 뜰 때까지 게임을 \x08종료하지 마세요");
+            timer[cp] += 1;
+            if(timer[cp] == 40) {
+                timer[cp] = 0;
+                stats[cp] = SAVE;
+            }
+            break;
+        case SAVE_END:
+            eprintln("\x07[SCA] \x04저장이 완료되었습니다");
+            timer[cp] += 1;
+            if(timer[cp] == 50) {
+                timer[cp] = 0;
+                stats[cp] = USER_STATUS;
+            }
+            break;
+        case SAVE:
+            eprintln("\x07[SCA] \x04저장중입니다");
+            break;
+        case SAVE_DENY:
+            eprintln("\x07[SCA] \x04저장할 수 없는 지역입니다");
+            timer[cp] += 1;
+            if(timer[cp] == 50) {
+                timer[cp] = 0;
+                stats[cp] = USER_STATUS;
+            }
+            break;
+        case LOADING:
+            eprintln("\x07[SCA] \x04슬롯 데이터를 불러오는 중입니다");
+            break;
+        case LOAD_END:
+            eprintln("\x07[SCA] \x04슬롯 데이터를 불러오는데 성공했습니다");
+            timer[cp] += 1;
+            if(timer[cp] == 50) {
+                timer[cp] = 0;
+                stats[cp] = 0;
+            }
+            break;
+        case LOAD_GLOBAL:
+            eprintln("\x07[SCA] \x04버전 정보를 불러오는 중입니다");
+            break;
+        case SCA_WAIT:
+            eprintln("\x07[SCA] \x04연결을 기다리고 있습니다");
+            break;
+    }
+}

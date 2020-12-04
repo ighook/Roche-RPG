@@ -1,0 +1,44 @@
+import System as sys;
+import User.Info as user;
+import User.StatusBar as status;
+import Variable as v;
+import User.Stats as stats;
+import Item.Manager as item;
+//import Equip as equip;
+
+function NewCharacter() {
+    const cp = getcurpl();
+    setloc("temp", 322, 280);
+    bwrite(0x65FD00 + 18424 + v.playerUnit[cp], 71); // 그래픽 시민으로 변경
+    bwrite(0x65FD00 + 14776 + cp, 130); // 무기 NONE
+    if(v.singlePlay == false) CenterView("temp");
+    user.character[cp] = sys.SetNextUnitEPD();
+    CreateUnit(1, v.playerUnit[cp], "temp", cp);
+
+    user.position[cp] = 1;
+    user.alive[cp] = 1;
+    user.level[cp] = 1;
+    //user.maxHP[cp] = v.defaultHP;
+    //user.maxMP[cp] = v.defaultMP;
+    //user.mp[cp] = v.defaultMP;
+    //user.physDmg[cp] = v.defaultDmg;
+
+    //stats.SetHP();
+    sys.Heal();
+    stats.RefreshExp();
+    SetMemoryXEPD(user.character[cp] + 0x08F / 4, SetTo, user.level[cp] * 16777216, 0xFF000000);
+
+    item.AddItem(10000, 2, 1, 1, false);
+    item.AddItem(10000, 3, 1, 1, false);
+    //item.AddItem(10000, 1, 1, 1, false);
+    //item.AddItem(10000, 1, 2, 2, false);
+    //item.AddItem(10000, 1, 16, 3, false);
+    //item.AddItem(10000, 1, 17, 4, false);
+    //status.stats[cp] = status.USER_STATUS;
+    //user.posX[cp], user.posY[cp] = dwbreak(dwread_epd(user.character[cp] + 0x28 / 4))[[0,1]];
+    //equip.EquipWeapon(1);
+}
+
+function LoadCharacter() {
+    const cp = getcurpl();
+}

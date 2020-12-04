@@ -1,0 +1,10 @@
+import Variable as v;
+import User.Info as user;
+
+function ChatDetect(cp) {
+    if(v.chat[cp] == 0) return;
+    else if(v.chat[cp] == 3) v.s.print("\x07isAlive \x04: ", user.isAlive[cp]);
+    else if(v.chat[cp] == 4) v.s.print("\x07inConv \x04: ", user.inConv[cp]);
+    else if(v.chat[cp] == 5) v.s.print("\x07started \x04: ", v.started[cp]);
+    else if(v.chat[cp] == 6) user.exp[cp] += 10;
+}

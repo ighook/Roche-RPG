@@ -1,0 +1,141 @@
+import System as sys;
+import User.Info as user;
+import Variable as v;
+import Item.Manager as item;
+
+function BuildCheckXEPD(unitEPD ,Unit: TrgUnit);
+function BuildResetXEPD(unitEPD);
+function SkillUseCheck();
+function UseHPPtn();
+function UseMPPtn();
+
+function clickedUnit() {
+	foreach(cp: EUDLoopPlayer())  {
+		var ptr;
+		var epd;
+        var unitType;
+		// [수정 금지] 선택한 유닛이 없으면 스킵
+		const prevPtrs, prevEPDs = PVariable(), PVariable();
+		const clickedUnitEPD = EPD(0x6284E8) + 12 * cp;
+		EUDContinueIf(MemoryEPD(clickedUnitEPD, AtMost, 0x59CCA7));
+		const prevPtr = prevPtrs[cp];
+		setcurpl(cp);
+		if(MemoryEPD(clickedUnitEPD, (10), prevPtr)) {
+			// [수정금지] 이전 ptr, epd 가져오기
+			const prevEPD = prevEPDs[cp];
+			SetVariables(list(ptr, epd), list(prevPtr, prevEPD));
+		}
+		else {
+			// [수정 금지] 유닛 클릭 달라진걸 인식
+			SetVariables(list(ptr, epd), cunitepdread_epd(clickedUnitEPD));
+			prevPtrs[cp] = ptr;
+			prevEPDs[cp] = epd;
+			// ☞클릭 유닛이 바뀌었을 때 1번 실행할 내용은 여기에!☜;
+            unitType = wread_epd(epd + 0x64 / 4, 0x64 % 4);
+			//var temp = bread_epd(epd + 0x026 / 4,  0x026 % 4);
+			var temp = maskread_epd(epd + 0x026 / 4, 0xFF0000) / 65536;
+			v.s.print("\x07[clickedUnit.eps] \x1f유닛 타입 \x04: ", unitType, "  \x1f0x026 \x04: ", temp);
+			if(IsUserCP()) {
+				settbl2(16, 0, "\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D");
+				if(temp == 0) settbl2(16, 0, "\x05시민");
+				else if(temp == 1) settbl2(16, 0, "\x04리아");
+				else if(temp == 2) settbl2(16, 0, "\x04경비병");
+				else if(temp == 3) settbl2(16, 0, "\x04전사");
+				else if(temp == 4) settbl2(16, 0, "\x04궁수");
+			}
+			sys.ButtonRefresh();
+		}
+		// ☞클릭 유닛한테 항상 실행할 내용은 여기에!☜;
+        //UseHPPtn(unitType);
+        //UseMPPtn(unitType);
+		// [수정 금지] 생산 중인 대기열 없으면 스킵
+		if(MemoryEPD(epd + 0x98/4, Exactly, 0xE400E4) && MemoryEPD(epd + 0x9C/4, Exactly, 0xE400E4) && MemoryXEPD(epd + 0xA0/4, Exactly, 0xE4, 0xFFFF)) {
+			continue; 
+		};
+		// 대기열 인식 작성
+	}
+}
+/*function SkillUseCheck() {
+	const cp = getcurpl();
+	if(MemoryXEPD(v.character[cp] + 38, AtMost, 3, 0xFFFF)){
+		pressKey[cp] = maskread_epd(user.character[cp] + 0x98/4, 0);//wread_epd(user.character[cp] + 0x98/4, 0x98%4);
+		return True;
+	} else if(MemoryXEPD(user.character[cp] + 38, AtMost, 196608, 0xFFFF0000)){
+		return True;
+	} else if(MemoryXEPD(user.character[cp] + 39, AtMost, 3, 0xFFFF)){
+		return True;
+	} else if(MemoryXEPD(user.character[cp] + 39, AtMost, 196608, 0xFFFF0000)){
+		return True;
+	} else if(MemoryXEPD(user.character[cp] + 40, AtMost, 3, 0xFFFF)){
+		return True;
+	} else{
+		return False;
+	};
+}*/
+
+function BuildCheckXEPD(unitEPD ,Unit: TrgUnit) {
+	const mulUnit = Unit * 65536;
+	if(MemoryXEPD(unitEPD + 38, Exactly, Unit, 0xFFFF)){
+		return True;
+	} else if(MemoryXEPD(unitEPD + 38, Exactly, mulUnit, 0xFFFF0000)){
+		return True;
+	} else if(MemoryXEPD(unitEPD + 39, Exactly, Unit, 0xFFFF)){
+		return True;
+	} else if(MemoryXEPD(unitEPD + 39, Exactly, mulUnit, 0xFFFF0000)){
+		return True;
+	} else if(MemoryXEPD(unitEPD + 40, Exactly, Unit, 0xFFFF)){
+		return True;
+	} else{
+		return False;
+	};
+}
+
+function BuildResetXEPD(unitEPD) {
+	SetMemoryXEPD(unitEPD + 38, SetTo, 14942436, 0xFFFFFFFF);
+	SetMemoryXEPD(unitEPD + 39, SetTo, 14942436, 0xFFFFFFFF);
+	SetMemoryXEPD(unitEPD + 40, SetTo, 228, 0xFFFF);
+	SetMemoryXEPD(unitEPD + 41, SetTo, 131072, 0xFFFF0000);
+}
+
+function UseHPPtn(unit) {
+    const cp = getcurpl();
+    if(v.KeyD[cp] == 1) {
+        if(unit == v.unitNum[cp]) {
+            if(user.useHPPtn[cp] == 0) {
+                v.s.printAt(10, "\x05등록된 체력 물약이 없습니다");
+                return;
+            }
+            else if(user.remainHPPtn[cp] == 0) {
+                v.s.printAt(10, "\x05체력 물약이 부족합니다");
+                return;
+            }
+            else if(MemoryEPD(user.character[cp] + 0x8 / 4, Exactly, user.maxHP[cp] * 256)) {
+				v.s.printAt(10, "\x05최대 체력입니다");
+				return;
+			}
+            user.remainHPPtn[cp] -= 1;
+            sys.SetHP(user.recoveryHPPtn[cp], Add);
+            v.s.printAt(10, "\x04체력을 \x08", user.recoveryHPPtn[cp], " \x04만큼 회복합니다  \x05", user.remainHPPtn[cp], " 개 남음");
+            item.RemoveItem(1, user.useHPPtn[cp], 1);
+        }
+    }
+}
+
+function UseMPPtn(unit) {
+    const cp = getcurpl();
+    if(v.KeyF[cp] == 1) {
+        if(unit == v.unitNum[cp]) {
+            if(user.useMPPtn[cp] == 0) {
+                v.s.printAt(10, "\x05등록된 마나 물약이 없습니다");
+                return;
+            }
+            else if(user.remainMPPtn[cp] == 0) {
+                v.s.printAt(10, "\x05마나 물약이 부족합니다");
+                return;
+            }
+            user.remainMPPtn[cp] -= 1;
+            v.s.printAt(10, "\x04마나를 \x1E", user.recoveryMPPtn[cp], " \x04만큼 회복합니다  \x05", user.remainMPPtn[cp], " 개 남음");
+            item.RemoveItem(1, user.useMPPtn[cp], 1);
+        }
+    }
+}

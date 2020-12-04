@@ -1,0 +1,15 @@
+import Variable as v;
+import SCA.Save as save;
+import Screen as screen;
+import System as sys;
+
+function KeyDetect(cp) {
+    if(v.key[cp] == 0) return;
+    else if(v.key[cp] == v.KeySave) save.Save(); // F12 수동 저장
+    else if(sys.single == false && v.key[cp] == v.KeyWideCheck) screen.WideCheck(); // ALT 와이드 체크
+
+    if(v.numberKey[cp] == 0) return;
+    else {
+        v.s.print("\x05", v.numberKey[cp], "키 누름");
+    }
+}

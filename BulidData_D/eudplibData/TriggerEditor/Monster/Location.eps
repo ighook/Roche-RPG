@@ -1,0 +1,173 @@
+import Variable as v;
+
+var spawnLocGoblin 		= 0;
+var spawnLocBiter 		= 0;
+var spawnLocOrc 		= 0;
+var spawnLocLamia 		= 0;
+var spawnLocFang 		= 0;
+var spawnLocOger 		= 0;
+var spawnLocSkeleton 	= 0;
+var spawnLocLIch 		= 0;
+
+const locGoblinX 	= EUDArray(50);
+const locGoblinY 	= EUDArray(50);
+const locBiterX 	= EUDArray(50);
+const locBiterY 	= EUDArray(50);
+const locLamiaX 	= EUDArray(50);
+const locLamiaY 	= EUDArray(50);
+const locOrcX 		= EUDArray(50);
+const locOrcY 		= EUDArray(50);
+const locFangX 		= EUDArray(50);
+const locFangY 		= EUDArray(50);
+const locOgerX 		= EUDArray(50);
+const locOgerY 		= EUDArray(50);
+const locSkeletonX 	= EUDArray(50);
+const locSkeletonY 	= EUDArray(50);
+const locLichX 		= EUDArray(50);
+const locLichY	 	= EUDArray(50);
+
+var temp = 0;
+
+function MobSpawnLocationCheck() {
+	// 드론 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Zerg Drone", "Anywhere")'));
+	SetVariables(spawnLocGoblin, temp);
+	// 브루들링 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Zerg Broodling", "Anywhere")'));
+	SetVariables(spawnLocBiter, temp);
+	// 저글링 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Zerg Zergling", "Anywhere")'));
+	SetVariables(spawnLocOrc, temp);
+	// 히드라 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Zerg Hydralisk", "Anywhere")'));
+	SetVariables(spawnLocLamia, temp);
+	// 디파일러 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Zerg Defiler", "Anywhere")'));
+	SetVariables(spawnLocFang, temp);
+	// 디버우링원 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Devouring One (Zergling)", "Anywhere")'));
+	SetVariables(spawnLocOger, temp);
+	// 질럿 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Protoss Zealot", "Anywhere")'));
+	SetVariables(spawnLocSkeleton, temp);
+	// 하이템플러 수 체크
+	temp = EUDBinaryMax(py_eval('lambda x: Bring(P7, AtLeast, x, "Protoss High Templar", "Anywhere")'));
+	SetVariables(spawnLocLIch, temp);
+	setloc("temp", 0, 0);
+
+	for(var i = 0; i < spawnLocGoblin; i++) {	
+		if(Bring(P7, Exactly, 0, "Zerg Drone", "Anywhere")) break;
+		MoveLocation("temp", "Zerg Drone", P7, "Anywhere");
+		RemoveUnitAt(1, "Zerg Drone", "temp", P7);
+		var loc = EPD(0x58DC4C) + $L("temp") * 5;
+		locGoblinX[i] = dwread_epd(loc + 0);
+		locGoblinY[i] = dwread_epd(loc + 1);
+        setcurpl(0);
+        //v.s.print(locGoblinX[i], " ", locGoblinY[i]);
+	}
+	
+	/*for(var i = 0; i < spawnLocBiter; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Zerg Broodling", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Zerg Broodling", P7, "Anywhere");
+		RemoveUnitAt(1, "Zerg Broodling", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locBiterX[i] = (left + right) / 2;
+		locBiterY[i] = (up + down) / 2;
+	}
+	
+	for(var i = 0; i < spawnLocOrc; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Zerg Zergling", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Zerg Zergling", P7, "Anywhere");
+		RemoveUnitAt(1, "Zerg Zergling", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locOrcX[i] = (left + right) / 2;
+		locOrcY[i] = (up + down) / 2;
+	}
+	
+	for(var i = 0; i < spawnLocLamia; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Zerg Hydralisk", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Zerg Hydralisk", P7, "Anywhere");
+		RemoveUnitAt(1, "Zerg Hydralisk", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locLamiaX[i] = (left + right) / 2;
+		locLamiaY[i] = (up + down) / 2;
+	}
+	
+	for(var i = 0; i < spawnLocFang; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Zerg Defiler", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Zerg Defiler", P7, "Anywhere");
+		RemoveUnitAt(1, "Zerg Defiler", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locFangX[i] = (left + right) / 2;
+		locFangY[i] = (up + down) / 2;
+	}
+	
+	for(var i = 0; i < spawnLocOger; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Devouring One (Zergling)", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Devouring One (Zergling)", P7, "Anywhere");
+		RemoveUnitAt(1, "Devouring One (Zergling)", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locOgerX[i] = (left + right) / 2;
+		locOgerY[i] = (up + down) / 2;
+	}
+	
+	for(var i = 0; i < spawnLocSkeleton; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Protoss Zealot", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Protoss Zealot", P7, "Anywhere");
+		RemoveUnitAt(1, "Protoss Zealot", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locSkeletonX[i] = (left + right) / 2;
+		locSkeletonY[i] = (up + down) / 2;
+	}
+	
+	for(var i = 0; i < spawnLocLIch; i++)
+	{	
+		if(Bring(P7, Exactly, 0, "Protoss High Templar", "Anywhere")) break;
+		MoveLocation("CreateMonster", "Protoss High Templar", P7, "Anywhere");
+		RemoveUnitAt(1, "Protoss High Templar", "CreateMonster", P7);
+		
+		const left = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 0);
+		const up = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 1);
+		const right = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 2);
+		const down = dwread_epd(EPD(0x58DC4C) + $L("CreateMonster") * 5 + 3);
+		
+		locLichX[i] = (left + right) / 2;
+		locLichY[i] = (up + down) / 2;
+	}*/
+}

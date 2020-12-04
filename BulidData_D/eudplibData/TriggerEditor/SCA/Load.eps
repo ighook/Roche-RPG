@@ -1,0 +1,31 @@
+import Inventory as inven;
+import User.Info as user;
+import Variable as v;
+import SCA.Data as data;
+
+const loadItem = PVariable();
+
+function LoadSlot() {
+	const cp = getcurpl();
+	for(var i = 0; i < 5; i++) {
+		user.slotLevel[5 * cp + i] = data.userSlot[5 * cp + i] / 1000000;
+	}
+}
+
+/*
+function LoadItem() {
+	const cp = getcurpl();
+	const t = 24 * cp;
+	loadItem[cp] = 1;
+	for(var i = 0; i < 24; i++) {
+		if(save.userInven[t + i] == 0) break;
+		const type = save.userInven[t + i] / py_pow(10, 6);
+		save.userInven[t + i] -= type * py_pow(10, 6);
+		const index = save.userInven[t + i] / py_pow(10, 3);
+		save.userInven[t + i] -= index * py_pow(10, 3);
+		const amount = save.userInven[t + i];
+		item.AddItem(10000, type, index, amount, false);
+	}
+	loadItem[cp] = 0;
+	v.s.print("\x04아이템을 불러옵니다");
+}*/

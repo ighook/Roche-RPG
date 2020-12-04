@@ -1,0 +1,119 @@
+
+const ws = Db(2528);//workspace
+const EntryPointLength = 8;//EntryPointLength
+const SpaceLength = 300;//DataBufferSize
+const ObjectCount = 1;//ObjectCount
+
+function Init(){
+    MPQAddFile('SCARCHIVEMAPCODE', py_open('scakeyfile', 'rb').read());
+    MPQAddFile('SCARCHIVEDATA', py_open('scadatafile', 'rb').read());
+    //EntryPoint
+    dwwrite_epd(EPD(ws) + 0, 1953016160);
+    dwwrite_epd(EPD(ws) + 1, 2083283477);
+    dwwrite_epd(EPD(ws) + 2, 431646295);
+    dwwrite_epd(EPD(ws) + 3, 1279016775);
+    dwwrite_epd(EPD(ws) + 4, 2075453429);
+    dwwrite_epd(EPD(ws) + 5, 1316678450);
+    dwwrite_epd(EPD(ws) + 6, 805170100);
+    dwwrite_epd(EPD(ws) + 7, 3855772339);
+    
+}
+
+
+function Exec(){
+    Init();
+}
+
+
+function ResetValue(tagNum, index){
+    const cp = getcurpl();
+    switch(tagNum){
+    case 0:
+    {
+        SetDeaths(CurrentPlayer, SetTo, 0, 0);
+        break;
+    }
+    }
+}
+
+
+function SaveValue(tagNum, Value, index){
+    const cp = getcurpl();
+    switch(tagNum){
+    case 0:
+    {
+        SetDeaths(CurrentPlayer, SetTo, Value, 0);
+        break;
+    }
+    }
+}
+
+
+function SaveDataWriteValue(tagNum, BaseAddress, index){
+    const cp = getcurpl();
+    switch(tagNum){
+    case 0:
+        {
+        const objValue = dwread_epd(0 * 12 + cp);
+        if(objValue != 0){
+            if (objValue > 0xFFFF){
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x1000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue / 0x10000);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue % 0x10000);
+                index++;
+             }else{
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, 0x2000 + tagNum);
+                index++;
+                wwrite_epd(BaseAddress + index / 2, (index % 2) * 2, objValue);
+                index++;
+             }
+         }
+        }
+        break;
+    }
+    
+    return index;
+}
+
+
+function LoadDataReadValue(BaseAddress, i){
+   	const indicator = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   	
+   	if (indicator != 0){
+   		const spec = indicator / 0x1000;
+   		const ObjNum = indicator % 0x1000;
+   		var vindex = 0;
+   		var value = 0;
+   		if (spec == 1){
+   			//4바이트 지정
+   			i++;
+   			const value1 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			const value2 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			value = value1 * 0x10000 + value2;
+   		}else if (spec == 2){
+   			//2바이트 지정
+   			i++;
+   			value = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   		}else if (spec == 3){
+   			//4바이트 지정
+   			i++;
+   			vindex = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			const value1 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			const value2 = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			value = value1 * 0x10000 + value2;
+   		}else if (spec == 4){
+   			//2바이트 지정
+   			i++;
+   			vindex = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   			i++;
+   			value = wread_epd(BaseAddress + i / 2, (i % 2) * 2);
+   		}
+   		SaveValue(ObjNum, value, vindex);
+   	}
+   	return i;
+}

@@ -1,0 +1,62 @@
+import Variable as v;
+import System as sys;
+import User.StatusBar as statusBar;
+import User.Character as char;
+import User.Inventory as inven;
+import NPC.NPC as npc;
+import NPC.Guard as guard;
+import Item.Manager as item;
+import Screen as screen;
+import TriggerEditor.SCArchive as sca;
+
+function onPluginStart() {
+    //sca.Init();
+    //sys.UDPBan();           // UDP 금지
+    //sys.SpeedBan();         // 배속 금지
+    sys.SetPColor(7, 0);    // 플레이어 7 색 변경
+	sys.SetPColor(8, 196);  // 플레이어 8 색 변경
+    sys.RegisterMSQC();     // MSQC 변수 
+    sys.SinglePlayCheck();  // 싱글플레이 체크
+    sys.SetAlly();          // 동맹 설정
+    npc.CreateNPC();        // NPC 유닛 생성
+    item.SetItemInfo();     // 아이템 정보 입력
+
+    foreach (cp : EUDLoopPlayer()) {
+        setcurpl(cp);
+        inven.ResetInven(); // 인벤토리 초기화
+        sys.SetName(); // 유닛 이름 변경
+        screen.light[cp] = 31; // 밝기 최대로 변경
+        statusBar.stats[cp] = statusBar.USER_STATUS; // 상태바 기본값으로 설정
+        char.NewCharacter(); // 캐릭터 생성 (임시)
+
+        // 아이템 추가
+        item.AddItem(10000, 1, 1, 10, true); 
+        item.AddItem(10000, 1, 2, 10, true);
+    }
+}
+
+function beforeTriggerExec() {
+    sca.Exec();
+    foreach (cp : EUDLoopPlayer()) {
+        setcurpl(cp);
+        sys.GetMousePos(); // 마우스 좌표
+        statusBar.StatusBar(); // 상태바
+        sys.SetPlayerLoc(); // 플레이어 로케이션
+        if(v.KeyALT[cp] == 1 && v.singlePlay == 0) screen.WideCheckStart(); // ALT키 와이드 체크
+
+        inven.Inventory(); // 인벤토리
+        guard.Guard(); // 경비병
+        //if(v.KeyC[cp] == 1) v.s.print("\x07[Main.eps] \x04C키 누름");
+        //if(v.KeyI[cp] == 1) v.s.print("\x07[Main.eps] \x04I키 누름");
+        //if(v.KeyALT[cp] == 1) v.s.print("\x07[Main.eps] \x04ALT키 누름");
+        
+        screen.WideCheckExec(); // 와이드 체크
+        screen.LightCheck(); // 밝기 체크
+        sys.AllyCheck(); // 동맹 체크
+    }
+    SetMemoryEPD(EPD(0x5124F0), SetTo, 28);
+}
+
+function afterTriggerExec() {
+    
+}

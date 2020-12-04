@@ -1,0 +1,43 @@
+import System as sys;
+import User.Info as user;
+import Item.Manager as item;
+import Variable as v;
+
+const s = StringBuffer(1000);
+
+const openedBox1 = PVariable();
+const openedBox2 = PVariable();
+const box = EUDArray(10);
+
+function CreateBox() {
+    /*setloc("temp", 1158, 386);
+    box[0] = sys.SetNextUnitEPD();
+    CreateUnit(1, 222, "temp", P7);
+    setloc("temp", 1238, 318);
+    box[1] = sys.SetNextUnitEPD();
+    CreateUnit(1, 222, "temp", P7);*/
+}
+
+function OpenBox() {
+    const cp = getcurpl();
+    if(v.key[cp] == 0) return;
+    if(user.inMap[cp] == 2) {
+        if(sys.EPDBring(v.locNum[cp], box[0])) {
+            if(openedBox1[cp] == 0) {
+                openedBox1[cp] = 1;
+                item.AddItem(10000, 1, 1, 30, false);
+                item.AddItem(10000, 1, 16, 30, false);
+                v.s.printAt(10, "\x13\x05소량의 물약을 획득했다");
+            }
+            else v.s.printAt(10, "\x13\x05비어있다");
+        }
+        else if(sys.EPDBring(v.locNum[cp], box[1])) {
+            if(openedBox2[cp] == 0) {
+                openedBox2[cp] = 1;
+                item.AddItem(10000, 2, 1, 1, false);
+                v.s.printAt(10, "\x13\x05무기를 획득했다");
+            }
+            else v.s.printAt(10, "\x13\x05비어있다");
+        }
+    }
+}

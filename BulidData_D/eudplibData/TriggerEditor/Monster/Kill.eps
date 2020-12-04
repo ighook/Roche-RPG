@@ -1,0 +1,19 @@
+import System as sys;
+import User.Info as user;
+import Variable as v;
+import Monster.Info as mob;
+
+function KillCheck() {
+    const cp = getcurpl();
+    if(Kills(cp, AtLeast, 1, "Zerg Drone")) {
+        SetKills(cp, Subtract, 1, "Zerg Drone");
+        user.exp[cp] += mob.goblinExp;
+        user.gold[cp] += mob.goblinGold;
+    }
+    if(Kills(cp, AtLeast, 1, "Zerg Broodling")) {
+        SetKills(cp, Subtract, 1, "Zerg Broodling");
+        user.exp[cp] += 1;
+        user.exp[cp] += mob.biterExp;
+        user.gold[cp] += mob.biterGold;
+    }
+}

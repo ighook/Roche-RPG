@@ -1,0 +1,56 @@
+import Variable as v;
+import User.Info as user;
+
+//글로벌 변수
+var X0 = 0;
+const X1 = EUDArray(11);
+const X2 = EUDArray(10);
+const X3 = EUDArray(10);
+const X4 = PVariable();
+const X5 = PVariable();
+//수정할 변수
+const Trap1 = PVariable(); //변조확인
+   
+
+
+function Init(){
+    for(var i = 1 ; i < 11 ; i++){
+        const RandX = dwrand() % (32768) + 16348;
+        X1[i] = RandX;
+    }
+    X1[0] = 0;
+}
+
+function BeforeExec(){ //클래식 트리거 실행전 처리
+    const XX = X1[X0];
+    foreach(cp : EUDLoopPlayer()){
+        //변조 인식 이런식으로 넣으시면 됨
+        if (X2[cp] != XX + maskread_epd(EPD(0x57F0F0) + cp, 0xFFFFFFFF)) {
+            Trap1[cp] = 1;
+        }
+        if (X3[cp] != XX + maskread_epd(EPD(0x57F120) + cp, 0xFFFFFFFF)) {
+            Trap1[cp] = 2;
+        }
+        if (X4[cp] != XX + user.level[cp]) {
+            Trap1[cp] = 4;
+        }
+        if (X5[cp] != XX + user.exp[cp]) {
+            Trap1[cp] = 8;
+        }
+        //v.s.printAt(10, Trap1[cp]);
+    }
+}
+
+function AfterExec() {
+    X0 += 1;
+    if (X0 > 11){
+        X0 = 1;
+    }
+    const XX = X1[X0];
+    foreach(cp : EUDLoopPlayer()){
+        //X2[cp] = XX + maskread_epd(EPD(0x57F0F0) + cp, 0xFFFFFFFF);
+        //X3[cp] = XX + maskread_epd(EPD(0x57F120) + cp, 0xFFFFFFFF);
+        X4[cp] = XX + user.level[cp];
+        X5[cp] = XX + user.exp[cp];
+    }
+}

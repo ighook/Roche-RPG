@@ -1,0 +1,228 @@
+import TriggerEditor.SCArchive as sca;
+import Screen as screen;
+import System as sys;
+import Variable as v;
+import Item.Manager as item;
+import Inventory as inven;
+import User.Info as user;
+import User.Stats as stats;
+import User.Character as char;
+import Equip as equip;
+import Potal as potal;
+import StatusBar as status;
+import Box as box;
+import SCA.Load as load;
+import SCA.Data as data;
+import SCA.Slot as slot;
+
+const elapsedTime = PVariable();
+const step = PVariable();
+const selectedSlot = PVariable();
+const selectNewSlot = PVariable();
+const Message = PVariable();
+const helpPage = PVariable();
+const color = EUDArray(5);
+const mousePosition = PVariable();
+const btn1 = Db("\x07새로하기");
+const btn2 = Db("\x0F불러오기");
+
+function GameStart();
+
+function Opening() {
+    const cp = getcurpl();
+    if(step[cp] == 0) {
+        if(elapsedTime[cp] == 0) {
+            if(IsUserCP()) {
+                screen.light[cp] = 0;
+                SetMemoryEPD(EPD(0x657A9C), SetTo, 0);
+            }
+            //if(sys.single == false) screen.ScrollLock();
+        }
+        else if(elapsedTime[cp] == 1) {
+            screen.SetLight(0);
+        }
+        else if(elapsedTime[cp] == 2) {
+            elapsedTime[cp] += 1;
+            status.stats[cp] = status.SCA_WAIT;
+            step[cp] = 1;
+            helpPage[cp] = 1;
+            if(sys.single == false) screen.WideCheck();
+            user.inConv[cp] = 1;
+            v.textRefresh[cp] = 1;
+        }
+        elapsedTime[cp] += 1;
+    }
+    // SCA 체크 단계
+    if(step[cp] == 1) {
+        sys.Stop();
+        if(sca.ConnectStatus() == 0) {
+            if(v.textRefresh[cp] == 1) {
+                v.textRefresh[cp] = 0;
+                v.display.insert(0);
+                if(helpPage[cp] == 1) {
+                    v.display.append("\x13\x07다운로드 링크\n");
+                    v.display.append("\x13\x04www.scarchive.kr\n\n");
+                }
+                else if(helpPage[cp] == 2) {
+                    v.display.append("\x13\x07주의 사항\n");
+                    v.display.append("\x13\x04스타크래프트를 32비트로 설정해 주세요\n\n");
+                }
+                v.display.append("\x13\x15■ \x1e이전    \x15■ \x1e다음\n");
+                v.display.append("\x13\x05이전 또는 다음을 마우스로 클릭 해주세요\n");
+            }
+            v.display.DisplayAt(0);
+            if(v.mouse[cp] == 1) {
+                if(sys.clickedLine(3)) {
+                    var x = 0;
+                    if(v.screenMode[cp] == 2) x += 107;
+                    if(v.mouseX[cp] >= 277 + x && v.mouseX[cp] <= 324 + x) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        v.s.printAt(3, "\x13\x15■ \x0e이전    \x15■ \x1e다음");
+                        if(helpPage[cp] == 2) helpPage[cp] = 1;
+                        v.textRefresh[cp] = 1;
+                    }
+                    else if(v.mouseX[cp] >= 328 + x && v.mouseX[cp] <= 364 + x) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        v.s.printAt(3, "\x13\x15■ \x1e이전    \x15■ \x0e다음");
+                        if(helpPage[cp] == 1) helpPage[cp] = 2;
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            if(v.chat[cp] == 2) {
+                sys.TextClear();
+                user.currentSlot[cp] = 1;
+                char.NewCharacter();
+                step[cp] = 2;
+                v.started[cp] = 1;
+                user.inConv[cp] = 0;
+                screen.SetLight(31);
+            }
+        }
+        else if(sca.ConnectStatus() == 1) {
+            //sca.LoadData(0);
+            sys.TextClear();
+            sca.LoadGlobalData();
+            status.stats[cp] = status.LOAD_GLOBAL;
+            step[cp] = 2;
+        }
+    }
+    else if(step[cp] == 2) {
+        if(sca.GetLastMessage() == 4) {
+            sca.ResetLastMessage();
+            status.stats[cp] = 0;
+            if(v.version != sca.GlobalData[0]) {
+                v.s.print("\x08최신 버전이 아닙니다");
+            }
+            else {
+                v.s.print("\x07최신 버전입니다");
+            }
+            step[cp] = 3;
+        }
+    }
+    else if(step[cp] == 3) {
+        if(sca.ConnectStatus() == 1) {
+            sca.LoadData(0);
+            status.stats[cp] = status.LOADING;
+            if(IsUserCP()) {
+                for(var i = 0; i < 5; i++) color[i] = Db("\x05");
+            }
+            step[cp] = 4;
+        }
+    }
+    else if(step[cp] == 4) {
+        if(sca.GetLastMessage() == 4) {
+            sca.ResetLastMessage();
+            status.stats[cp] = 1;
+            load.LoadSlot();
+            v.textRefresh[cp] = 1;
+            step[cp] = 5;
+        }
+    }
+    else if(step[cp] == 5) {
+        if(v.textRefresh[cp] == 1) {
+            v.textRefresh[cp] = 0;
+            v.display.insert(0);
+            v.display.append("\n\x13\x04================\n");
+            v.display.append("\x13", ptr2s(color[0]), "Lv.", user.slotLevel[5 * cp + 0], "  장착중인 무기 : -\n");
+            v.display.append("\x13", ptr2s(color[1]), "Lv.", user.slotLevel[5 * cp + 1], "  장착중인 무기 : -\n");
+            v.display.append("\x13", ptr2s(color[2]), "Lv.", user.slotLevel[5 * cp + 2], "  장착중인 무기 : -\n");
+            v.display.append("\x13", ptr2s(color[3]), "Lv.", user.slotLevel[5 * cp + 3], "  장착중인 무기 : -\n");
+            v.display.append("\x13", ptr2s(color[4]), "Lv.", user.slotLevel[5 * cp + 4], "  장착중인 무기 : -\n");
+            v.display.append("\x13\x04================\n");
+            v.display.append("\x13", ptr2s(btn1), "  ", ptr2s(btn2));
+        }
+        v.display.DisplayAt(0);
+        if(IsUserCP()) {
+            if(v._mouseY[cp] < 144 || v._mouseY[cp] > 222) {
+                if(mousePosition[cp] != 0) {
+                    mousePosition[cp] = 0;
+                    for(var i = 0; i < 5; i++) {
+                        if(selectedSlot[cp] != i + 1) color[i] = Db("\x05");
+                    }
+                    v.textRefresh[cp] = 1;
+                }
+            }
+            else {
+                for(var i = 0; i < 5; i++) {
+                    if(v._mouseY[cp] >= 144 + 16 * i && v._mouseY[cp] <= 158 + 16 * i) {
+                        mousePosition[cp] = i + 1;
+                        if(selectedSlot[cp] != i + 1) {
+                            if(strcmp(color[i], Db("\x05")) == 0) {
+                                color[i] = Db("\x04");
+                                v.textRefresh[cp] = 1;
+                            }
+                        }
+                    }
+                    else if(selectedSlot[cp] != i + 1 && strcmp(color[i], Db("\x05")) != 0) {
+                        color[i] = Db("\x05");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+        }
+        if(v.mouse[cp] == 1) {
+            if(v.mouseY[cp] >= 144 && v.mouseY[cp] <= 222) {
+                for(var i = 0; i < 5; i++) {
+                    if(sys.clickedLine(i + 2)) {
+                        PlayWAV("staredit\\wav\\click2.ogg");
+                        if(IsUserCP()) {
+                            color[i] = Db("\x1f");
+                            selectedSlot[cp] = i + 1;
+                            v.textRefresh[cp] = 1;
+                        }
+                        break;
+                    }
+                }
+            }
+            else if(sys.clickedLine(8)) {
+                var x = 0;
+                if(v.screenMode[cp] == 2) x = 106;
+                if(v.mouseX[cp] >= 273 + x && v.mouseX[cp] <= 317 + x) {
+                    PlayWAV("staredit\\wav\\click2.ogg");
+                    user.currentSlot[cp] = selectedSlot[cp];
+                    sys.TextClear();
+                    step[cp] = 6;
+                    v.started[cp] = 1;
+                    user.inConv[cp] = 0;
+                    screen.SetLight(31);
+                    char.NewCharacter();
+                }
+                else if(v.mouseX[cp] >= 324 + x && v.mouseX[cp] <= 368 + x) {
+                    PlayWAV("staredit\\wav\\click2.ogg");
+                }
+            }
+        }
+    }
+    /*else if(step[cp] == 4) {
+        if(sca.GetLastMessage() == 4) {
+            sca.ResetLastMessage();
+            sys.TextClear();
+            character.NewCharacter();
+            step[cp] = 5;
+            v.started[cp] = 1;
+            user.inConv[cp] = 0;
+            screen.SetLight(31);
+        }
+    }*/
+}

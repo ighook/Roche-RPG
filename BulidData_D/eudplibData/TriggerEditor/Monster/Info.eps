@@ -1,0 +1,29 @@
+const goblinHP = 10;
+const goblinDmg = 3;
+const goblinAtkSpeed = 40;
+const goblinSpeed = 650;
+const goblinExp = 10;
+const goblinGold = 10;
+
+const biterSpeed = 670;
+const biterExp = 20;
+const biterGold = 20;
+
+function SetMaxHP(unit:TrgUnit, hp);
+
+function SetInfo() {
+    // 드론
+    SetMemoryEPD(EPD(0x6C9F0C), SetTo, goblinSpeed);
+    SetMemoryXEPD(EPD(0x6C9C82), SetTo, goblinSpeed << 16, 0xFFFF0000);
+    SetMaxHP("Zerg Drone", goblinHP);
+    SetMemoryXEPD(EPD(0x656F06), SetTo, goblinDmg << 16, 0xFFFF0000);
+    SetMemoryXEPD(EPD(0x656FE3), SetTo, goblinAtkSpeed << 24, 0xFF000000);
+    
+    // 부르들링
+    SetMaxHP("Zerg Broodling", goblinHP);
+
+}
+
+function SetMaxHP(unit:TrgUnit, hp) {
+    SetMemory(0x662350 + unit * 4, SetTo, hp);
+}

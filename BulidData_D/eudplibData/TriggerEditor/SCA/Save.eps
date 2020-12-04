@@ -1,0 +1,106 @@
+import Inventory as inven;
+import User.Info as user;
+import Variable as v;
+import StatusBar as status;
+import Item.Info.Weapon as weapon;
+import Equip as equip;
+import SCA.Data as data;
+import TriggerEditor.SCArchive as sca;
+
+//const userSkill = EUDArray(skill.slot * 8);
+
+// 저장 쿨타임
+const saveCoolDown = PVariable();
+const saveTimer = PVariable();
+const step = PVariable();
+
+function SaveUserSlot();
+function SaveUserInven();
+function Save0Slot();
+
+function Save() {
+	const cp = getcurpl();
+	if(step[cp] != 0) return;
+	if(sca.ConnectStatus() == 1) {
+		if(saveCoolDown[cp] == 0) {	
+			SaveUserInven();
+			//SaveUserQuest();
+			//SaveSkill();
+			//if(Reset[cp] == 0) SaveLastPosition();
+			sca.SaveData(user.currentSlot[cp]); // 현재 슬롯에 저장
+			status.stats[cp] = status.SAVE_START;
+			step[cp] = 1;
+		}
+		//else v.s.print("\x07[SCA] \x04아직 저장할 수 없습니다.");
+	}
+	else status.stats[cp] = status.SCA_ERROR;
+	//else v.s.print("\x07[SCA] \x04SCA가 연결되어있지 않습니다");
+}
+
+function SaveCheck() {
+	const cp = getcurpl();
+	if(saveCoolDown[cp] > 0) saveCoolDown[cp] -= 1;
+	if(saveTimer[cp] > 0) saveTimer[cp] -= 1;
+	if(step[cp] == 1) {
+		if(sca.GetLastMessage() == 6) {
+			sca.ResetLastMessage();
+			step[cp] = 2;
+			saveTimer[cp] = 71;
+		}
+	}
+	else if(step[cp] == 2) {
+		if(saveTimer[cp] == 1) {
+			Save0Slot();
+		}
+		if(sca.GetLastMessage() == 6) {
+			sca.ResetLastMessage();
+			status.stats[cp] = status.SAVE_END;
+			saveCoolDown[cp] = 71;
+			step[cp] = 0;
+		}
+	}
+}
+
+function SaveUserSlot() {
+	const cp = getcurpl();
+	const w = weapon.Weapon.cast(equip.equip[7 * cp + 0]);
+	var info = user.level[cp] * py_pow(10, 6) + user.playTimeHour[cp] * py_pow(10, 2) + user.playTimeMin[cp];
+	data.userSlot[cp * 5 + user.currentSlot[cp] - 1] = info;
+	data.level[cp] = user.level[cp];
+	data.exp[cp] = user.exp[cp];
+	data.gold[cp] = user.gold[cp];
+}
+
+function SaveUserInven() {
+	const cp = getcurpl();
+	const t = 24 * cp;
+	for(var i = 0; i < 24; i++) {
+		const c = inven.Inven.cast(inven.inven[t + i]);
+		if(c.type != 0) {
+			var info = c.type * py_pow(10, 6) + c.index * py_pow(10, 3) + c.amount;
+			data.userInven[t + i] = info;
+		}
+	}
+}
+
+function Save0Slot() {
+	const cp = getcurpl();
+	SaveUserSlot();
+	
+	// 레벨, 경험치, 직업 백업
+	var tempLv = data.level[cp];
+	data.level[cp] = 0;
+	var tempExp = data.exp[cp];
+	data.exp[cp] = 0;
+
+	for(var i = 0; i < 20; i++) data.userQuest[i] = 0;
+	for(var i = 0; i < 24; i++) data.userInven[i] = 0;
+	for(var i = 0; i < 2; i++) data.userSkillSlot[i] = 0;
+	for(var i = 0; i < 30; i++) data.userSkill[i] = 0;
+
+	sca.SaveData(0);
+	
+	// 레벨, 경험치, 직업 복원
+	data.level[cp] = tempLv;
+	data.exp[cp] = tempExp;
+}

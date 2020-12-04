@@ -1,0 +1,346 @@
+import Screen as screen;
+import Potal as potal;
+import User.Info as user;
+import User.Stats as stats;
+import Variable as v;
+import Box as box;
+import Inventory as inven;
+import Equip as equip;
+import Item.Manager as item;
+//import Tree as tree;
+import Monster.Location as mobloc;
+import Monster.Info as mobinfo;
+import NPC.CreateNPC as npc;
+import Field.DrawVillage01 as vil01;
+
+const single = EUDVariable();
+const useSCA = EUDVariable();
+
+function SetNextUnitPTR();
+function SetNextUnitEPD();
+function SetAlliance();
+function ButtonRefresh();
+function SetPColor(pnum, color);
+function Heal();
+
+function Init() {
+	setcurpl(6);
+	SetAllianceStatus(Force1, Ally);
+    potal.PotalInit();
+    //box.CreateBox();
+    item.Init();
+	//vil01.DrawVillage();
+	//tree.CreateTree();
+	mobinfo.SetInfo();
+	mobloc.MobSpawnLocationCheck();
+	npc.CreateNPC();
+	SetPColor(7, 0);
+	SetPColor(8, 196);
+    if(Memory(0x57F0B4, Exactly, 0)) SetVariables(single, 1);
+    else SetVariables(single, 0);
+
+	//SCA
+	SetVariables(useSCA, false);
+
+    foreach (cp : EUDLoopPlayer()) {
+        setcurpl(cp);
+		SetAllianceStatus(P7, Ally);
+        inven.ResetInven();
+		equip.ResetEquip();
+        screen.light[cp] = 31;
+    }
+}
+
+function Stop() {
+    const cp = getcurpl();
+    MoveUnit(1, v.unitNum[cp], cp, "Anywhere", "Black");
+}
+
+function SetNextUnitPTR() {
+    return dwread_epd(EPD(0x628438));
+}
+
+function SetNextUnitEPD() {
+	return epdread_epd(EPD(0x628438));
+}
+
+function GetDeath() {
+    const cp = getcurpl();
+    v.key[cp] = dwread_epd(cp + 2148); // 179 Cave
+	v.numberKey[cp] = dwread_epd(cp + 2160); // 180 Cave-in
+	v.mouse[cp] = dwread_epd(cp + 84); // 7 SCV
+	user.deathZergling[cp] = dwread_epd(cp + 444); // 37 저글링
+	user.deathCavein[cp] = dwread_epd(cp + 2160); // 180 히드라
+	v.chat[cp] = dwread_epd(cp + 492); // 41 드론
+}
+
+function SetLocation(locationNum: TrgLocation, x, y, size) {
+    const loc = EPD(0x58DC4C) + locationNum * 5;
+    SetMemoryEPD(loc + 0, SetTo, x - size);
+    SetMemoryEPD(loc + 1, SetTo, y - size);
+    SetMemoryEPD(loc + 2, SetTo, x + size);
+    SetMemoryEPD(loc + 3, SetTo, y + size);
+}
+
+function PlayerLoc() {
+    const cp = getcurpl();
+    if(user.isAlive[cp] == true) {
+        MoveLocation(v.locNum[cp], v.unitNum[cp], cp, "Anywhere");
+    }
+}
+
+function TextClear() {
+    v.s.print("\n\n\n\n\n\n\n\n\n\n");
+}
+
+function EPDBring(Location: TrgLocation, UnitEPD) {
+	const posUnitX, posUnitY = dwbreak(dwread_epd(UnitEPD + 0x28 / 4))[[0,1]];
+	const LocEPD = Location * 5 + EPD(0x58DC4C);
+	if(
+		MemoryEPD(LocEPD, AtMost, posUnitX) &&
+		MemoryEPD(LocEPD + 2, AtLeast, posUnitX) &&
+		MemoryEPD(LocEPD + 1, AtMost, posUnitY) &&
+		MemoryEPD(LocEPD + 3, AtLeast, posUnitY)
+	){
+		return True;
+	}
+	return False;
+}
+
+function StructMemoryXEPD(unitEPD ,StructOffset ,value ,comparison: TrgComparison) {
+    var Mask;
+    switch(StructOffset % 4) {
+        case 0:
+            if(MemoryEPD(unitEPD + StructOffset / 4, comparison, value))
+                return True;
+            else return False;
+        	break;
+        case 1:
+            Mask = 0xFF00;
+            value = value*256;
+        	break;
+        case 2:
+            Mask = 0xFF0000;
+            value = value*65536;
+        	break;
+        case 3:
+            Mask = 0xFF000000;
+            value = value*16777216;
+        	break;
+    }
+	if(MemoryXEPD(unitEPD + StructOffset / 4, comparison, value, Mask)) return true;
+   	else return false;
+}
+
+function StructSetMemoryXEPD(unitEPD ,StructOffset ,value ,modifier: TrgModifier) {
+	var Mask;
+	switch(StructOffset % 4) {
+		case 0:
+			SetMemoryEPD(unitEPD + StructOffset / 4, modifier, value);
+			return;
+			break;
+        case 1:
+			Mask = 0xFF00;
+			value = value*256;
+			break;
+        case 2:
+			Mask = 0xFF0000;
+			value = value*65536;
+			break;
+        case 3:
+			Mask = 0xFF000000;
+			value = value*16777216;
+			break;
+    }
+    SetMemoryXEPD(unitEPD + StructOffset / 4, modifier, value, Mask);
+}
+
+function CloseWindow() {
+    inven.Close();
+	equip.Close();
+}
+
+function clickedLine(line) {
+	const cp = getcurpl();
+	if(line == 0) {
+		if(v.mouseY[cp] >= 112 && v.mouseY[cp] <= 126) return true;
+		else return false;
+	}
+	else if(line == 1) {
+		if(v.mouseY[cp] >= 128 && v.mouseY[cp] <= 142) return true;
+		else return false;
+	}
+	else if(line == 2) {
+		if(v.mouseY[cp] >= 144 && v.mouseY[cp] <= 158) return true;
+		else return false;
+	}
+	else if(line == 3) {
+		if(v.mouseY[cp] >= 160 && v.mouseY[cp] <= 174) return true;
+		else return false;
+	}
+	else if(line == 4) {
+		if(v.mouseY[cp] >= 176 && v.mouseY[cp] <= 190) return true;
+		else return false;
+	}
+	else if(line == 5) {
+		if(v.mouseY[cp] >= 192 && v.mouseY[cp] <= 206) return true;
+		else return false;
+	}
+	else if(line == 6) {
+		if(v.mouseY[cp] >= 208 && v.mouseY[cp] <= 222) return true;
+		else return false;
+	}
+	else if(line == 7) {
+		if(v.mouseY[cp] >= 224 && v.mouseY[cp] <= 238) return true;
+		else return false;
+	}
+	else if(line == 8) {
+		if(v.mouseY[cp] >= 240 && v.mouseY[cp] <= 254) return true;
+		else return false;
+	}
+	else if(line == 9) {
+		if(v.mouseY[cp] >= 256 && v.mouseY[cp] <= 270) return true;
+		else return false;
+	}
+}
+
+function UDPBan(){
+    const a = 0x6D0F48; //방이름
+    const b = 0x6D0F78; //방장닉
+    if(strcmp(a, b) == 0) {
+		for(var i=0; i<4; i++) {
+			setcurpl(i); 
+			v.s.print("\x13\x1EUDP에서 플레이는 금지하고 있습니다."); Defeat();
+		}
+	}
+}
+
+function SpeedBan(){
+	const a = dwread_epd_safe(EPD(0x51CE84));
+	const b = dwread_epd_safe(EPD(0x51CE88));
+	if(a == 1000){if(b == 1000) return;}		//턴레이트24
+	else if(a == 1042){if(b == 1190) return;}	//턴레이트20
+	else if(a == 1302){if(b == 1488) return;}	//턴레이트16
+	else if(a == 1488){if(b == 1701) return;}	//턴레이트14
+	else if(a == 1736){if(b == 1984) return;}	//턴레이트12
+	else if(a == 2083){if(b == 2381) return;}	//턴레이트10
+	else if(a == 2604){if(b == 2976) return;}	//턴레이트8
+	else{
+		foreach(cp : EUDLoopPlayer('Human', None, None)) {
+			setcurpl(cp); v.s.print("\x13\x1E배속 플레이는 금지하고 있습니다.");
+		}
+		dwread(0);
+	}
+}
+
+function GetMousePos() {
+	const cp = getcurpl();
+	if(v.mouse[cp] == 1) {
+		v.mouseX[cp] = dwread_epd(cp + 504);
+		v.mouseY[cp] = dwread_epd(cp + 684);
+	}
+	v._mouseX[cp] = dwread_epd(EPD(0x6CDDC4));
+	v._mouseY[cp] = dwread_epd(EPD(0x6CDDC8));
+	if(v._mouseX[cp] != v._prevMouseX[cp] || v._mouseY[cp] != v._prevMouseY[cp]) {
+		v.isMouseMoved[cp] = 1;
+		//v.s.print("마우스 움직임");
+		v._prevMouseX[cp] = v._mouseX[cp];
+		v._prevMouseY[cp] = v._mouseY[cp];
+	}
+}
+
+function SetName() {
+	const cp = getcurpl();
+	strcpy(v.name[cp], 0x57EEEB + 36 * cp);
+	settbl2(v.unitNum[cp] + 1, 0, "\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D\x0D");
+	settbl2(v.unitNum[cp] + 1, 0, "\x17:: \x04", ptr2s(v.name[cp]), " \x17::");
+}
+
+function ExpCheck() {
+	const cp = getcurpl();
+	if(user.prevExp[cp] != user.exp[cp]) {
+		stats.RefreshExp();
+		user.prevExp[cp] = user.exp[cp];
+		bwrite_epd(user.character[cp] + 0x08F / 4,  0x08F % 4, user.level[cp]);
+		
+		if(user.level[cp] > 0 && user.level[cp] < 100) {
+			if(user.exp[cp] >= v.maxExp[user.level[cp]]) {
+				user.exp[cp] -= v.maxExp[user.level[cp]];
+				user.level[cp] += 1;
+				SetMemoryXEPD(user.character[cp] + 0x08F / 4, SetTo, user.level[cp] << 24, 0xFF000000);
+				stats.SetDamage();
+				stats.SetHP();
+				Heal();
+			}
+		}
+		ButtonRefresh();
+	}
+}
+
+function Heal() {
+	const cp = getcurpl();
+	ModifyUnitHitPoints(1, v.unitNum[cp], cp, "Anywhere", 100);
+}
+
+function ButtonRefresh() {
+	const btntemp1 = wread_epd(EPD(0x6615AA), 2);
+	SetMemoryX(0x6615AA, SetTo, 0x20000, 0xFFFF0000);
+	const btntemp2, btntemp3 = cunitepdread_epd(EPD(0x628438));
+	CreateUnit(1, 73, 64, 7);
+	if(!Memory(0x628438, Exactly, btntemp2)) {
+		wwrite_epd(btntemp3 + 0x110/4, 0, 1);
+		wwrite_epd(EPD(0x6615AA), 2, btntemp1);
+	};
+}
+
+function SetPColor(pnum, color) {
+    const pcolor_dst = 0x581D76 + 8 * pnum;
+    const mcolor_dst = 0x581DD6 + pnum;
+    bwrite(pcolor_dst, color);
+    bwrite(mcolor_dst, color);
+}
+
+function SetUnitColorEPD(UnitEPD, Color) {
+    var spriteEPD = epdread_epd(UnitEPD + 0x00C / 4);
+    bwrite_epd(spriteEPD + 0x0A/4, 0x0A%4, Color);
+}
+
+function SetHP(val, modify:TrgModifier) {
+	const cp = getcurpl();
+	SetMemoryEPD(user.character[cp] + 0x8 / 4, modify, val * 256);
+	if(MemoryEPD(user.character[cp] + 0x8 / 4, AtLeast, user.maxHP[cp] * 256)) {
+		SetMemoryEPD(user.character[cp] + 0x8 / 4, SetTo, user.maxHP[cp] * 256);
+	}
+}
+
+function SetMaxHP() {
+	const cp = getcurpl();
+	SetMemoryEPD(EPD(0x662350) + v.unitNum[cp] * 4, SetTo, user.maxHP[cp] * 256);
+}
+
+function AllyCheck() {
+	if(!MemoryEPD(EPD(0x58D634), Exactly, 16843009) || !MemoryEPD(EPD(0x58D638), Exactly, 65793)) {
+		setcurpl(0);
+		SetAllianceStatus(Force1, Ally);
+	}
+	if(!MemoryEPD(EPD(0x58D640), Exactly, 16843009) || !MemoryEPD(EPD(0x58D644), Exactly, 65793)) {
+		setcurpl(1);
+		SetAllianceStatus(Force1, Ally);
+	}
+	if(!MemoryEPD(EPD(0x58D64C), Exactly, 16843009) || !MemoryEPD(EPD(0x58D650), Exactly, 65793)) {
+		setcurpl(2);
+		SetAllianceStatus(Force1, Ally);
+	}
+	if(!MemoryEPD(EPD(0x58D658), Exactly, 16843009) || !MemoryEPD(EPD(0x58D65C), Exactly, 65793)) {
+		setcurpl(3);
+		SetAllianceStatus(Force1, Ally);
+	}
+	if(!MemoryEPD(EPD(0x58D664), Exactly, 16843009) || !MemoryEPD(EPD(0x58D668), Exactly, 65793)) {
+		setcurpl(4);
+		SetAllianceStatus(Force1, Ally);
+	}
+	if(!MemoryEPD(EPD(0x58D670), Exactly, 16843009) || !MemoryEPD(EPD(0x58D674), Exactly, 65793)) {
+		setcurpl(5);
+		SetAllianceStatus(Force1, Ally);
+	}
+}

@@ -1,0 +1,81 @@
+[main]
+input: ..\..\D.scx
+output: ..\..\..\..\..\..\Documents\StarCraft\Maps\Download\!D.scx
+debug : 1
+[DataEditor.py]
+[ExtraDataEditor.py]
+[dataDumper]
+..\temp\custom_txt.tbl : 0x6D5A30, copy
+
+[TriggerEditor\새epScript파일.eps]
+
+[TriggerEditor\Main.eps]
+[MSQC]
+MSQCSpecial.Exactly(1) : MSQCSpecialBuffer, 100
+MSQCSpecial.Exactly(2) : MSQCSpecialBuffer, 200
+MSQCSpecial.Exactly(3) : MSQCSpecialBuffer, 300
+MSQCSpecial.Exactly(4) : MSQCSpecialBuffer, 400
+MSQCCondiction.Exactly(1) ; xy , MSQCValue : MSQCBuffer
+마우스 : 1
+NotTyping(); KeyDown(C) : Cave, 1
+NotTyping(); KeyDown(I) : Cave, 2
+NotTyping(); KeyDown(J) : Cave, 4
+NotTyping(); KeyDown(K) : Cave, 8
+NotTyping(); KeyDown(U) : Cave, 16
+NotTyping(); KeyDown(O) : Cave, 32
+NotTyping(); KeyDown(F12) : Cave, 64
+NotTyping(); KeyDown(Z) : Cave, 128
+NotTyping(); KeyDown(X) : Cave, 256
+NotTyping(); KeyUp(LALT) : Cave, 512
+
+NotTyping(); KeyDown(1) : Cave-in, 1
+NotTyping(); KeyDown(2) : Cave-in, 2
+NotTyping(); KeyDown(3) : Cave-in, 3
+NotTyping(); KeyDown(4) : Cave-in, 4
+NotTyping(); KeyDown(5) : Cave-in, 5
+NotTyping(); KeyDown(6) : Cave-in, 6
+NotTyping(); KeyDown(7) : Cave-in, 7
+NotTyping(); KeyDown(8) : Cave-in, 8
+NotTyping(); KeyDown(9) : Cave-in, 9
+NotTyping(); KeyDown(N) : Zerg Overlord, 1
+
+0x58D900, Exactly, 2 : Zerg Drone, 2
+0x58D900, Exactly, 3 : Zerg Drone, 3
+0x58D900, Exactly, 4 : Zerg Drone, 4
+0x58D900, Exactly, 5 : Zerg Drone, 5
+0x58D900, Exactly, 6 : Zerg Drone, 6
+
+MouseDown(L) : Terran SCV, 1
+MouseDown(L); val, 0x6CDDC4 : Zerg Overlord
+MouseDown(L); val, 0x6CDDC8 : Yggdrasill (Overlord)
+
+
+0x58DA00, Exactly, 1 : screen, 1
+0x58DA00, Exactly, 2 : screen, 2
+NotTyping; KeyDown(D) : KeyD, 1
+NotTyping; KeyDown(F) : KeyF, 1
+NotTyping; KeyDown(G) : KeyG, 1
+NotTyping; KeyDown(H) : KeyH, 1
+
+0x58D900, Exactly, 1 : Terran SCV, 2
+0x58D900, Exactly, 1; val, 0x58D904 : chatAddr
+0x58D900, Exactly, 1; val, 0x58D90C : chatLen
+0x58D900, Exactly, 1; val, 0x58D908 : chatPattern
+
+[EUDTurbo]
+[chatEvent]
+__Addr__ : 0x58D900
+__ptrAddr__ : 0x58D904
+__patternAddr__ : 0x58D908
+__lenAddr__ : 0x58D90C
+
+
+skip : 2
+alive : 3
+conv : 4
+started : 5
+exp : 6
+
+^add.* .*$ : 1
+[noAirCollision2]
+

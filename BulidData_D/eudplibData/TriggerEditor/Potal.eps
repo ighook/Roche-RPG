@@ -1,0 +1,58 @@
+import Variable as v;
+import User.Info as user;
+import System as sys;
+import StatusBar as status;
+import Opening as opening;
+import Screen as screen;
+import Box as box;
+import TriggerEditor.SCArchive as sca;
+
+const printText = PVariable();
+const potal = EUDArray(10);
+function CreatePotal();
+
+function PotalInit() {
+    potal[0] = sys.SetNextUnitEPD();
+    CreatePotal(919, 392);
+    potal[1] = sys.SetNextUnitEPD();
+    CreatePotal(1162, 393);
+    /*potal[2] = sys.SetNextUnitEPD();
+    CreatePotal(1325, 281);
+    potal[3] = sys.SetNextUnitEPD();
+    CreatePotal(1776, 270);
+    potal[4] = sys.SetNextUnitEPD();
+    CreatePotal(2663, 496);*/
+}
+
+function CreatePotal(x, y) {
+    setloc("temp", x, y);
+    CreateUnit(1, "Terran Beacon", "temp", P7);
+}
+
+function PotalCheck() {
+    const cp = getcurpl();
+    if(user.isAlive[cp] == 0) return;
+    if(v.key[cp] == 1) {
+        if(Bring(P7, Exactly, 0, "Terran Beacon", v.locNum[cp])) return;
+        if(user.inMap[cp] == 1) {
+            Move(potal[0], potal[1], 2);
+        }
+        else if(user.inMap[cp] == 2) {
+            Move(potal[1], potal[0], 1);
+        }
+        else if(user.inMap[cp] == 3) {
+            
+        }
+    }
+}
+
+function Move(loc1, loc2, map) {
+    const cp = getcurpl();
+    if(sys.EPDBring(v.locNum[cp], loc1)) {
+        const x, y = dwbreak(dwread_epd(loc2 + 0x28 / 4))[[0,1]];
+        setloc("temp", x, y);
+        MoveUnit(1, v.unitNum[cp], cp, "Anywhere", "temp");
+        if(sys.single == false) CenterView("temp");
+        user.inMap[cp] = map;
+    }
+}

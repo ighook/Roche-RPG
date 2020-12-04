@@ -1,0 +1,115 @@
+import User.Info as user;
+import Variable as v;
+import System as sys;
+import SCA.Save as save;
+import Screen as screen;
+import StatusBar as status;
+import TriggerEditor.SCArchive as sca;
+
+const mousePosition = PVariable();
+const crystal = PVariable();
+const color = EUDArray(2);
+
+function Open();
+function Close();
+
+function MemoryCrystal() {
+    const cp = getcurpl();
+    if(v.key[cp] == 1) {
+        if(Bring(P7, Exactly, 1, "Protoss Pylon", v.locNum[cp])) {
+            if(crystal[cp] == 0) Open();
+            else Close();
+        }
+    }
+    if(crystal[cp] == 1) {
+        if(v.textRefresh[cp] == 1) {
+            v.display.insert(0);
+            v.display.append("\x13\x1f= Memory Crystal =\n\n");
+            v.display.append("\x13\x1d(1)  ", ptr2s(color[0]) ,"현재의 기억을 크리스탈에 새긴다\n");
+            v.display.append("\x13\x1d(2)  ", ptr2s(color[1]) ,"다른 기억을 가져온다\n");
+        }
+        v.display.DisplayAt(0);
+        sys.Stop();
+        if(IsUserCP()) {
+            var c = 0;
+            /*if(v._mouseX[cp] > 20 && v._mouseX[cp] < 205)  {
+                c = 1;
+                if(v._mouseY[cp] < 144 || v._mouseY[cp] > 174) {
+                    mousePosition[cp] = 0;
+                }
+            }
+            else mousePosition[cp] = 0;*/
+            if(v._mouseY[cp] < 144 || v._mouseY[cp] > 174) {
+                mousePosition[cp] = 0;
+            }
+            
+            if(v._mouseY[cp] <= 158 && v._mouseY[cp] >= 144) {
+                if(mousePosition[cp] != 1) {
+                    color[0] = Db("\x04");
+                    mousePosition[cp] = 1;
+                }
+            }
+            else {
+                if(strcmp(color[0], Db("\x04")) == 0) {
+                    color[0] = Db("\x05");
+                }
+            }
+            if(v._mouseY[cp] <= 174 && v._mouseY[cp] >= 160) {
+                if(mousePosition[cp] != 2) {
+                    color[1] = Db("\x04");
+                    mousePosition[cp] = 2;
+                }
+            }
+            else {
+                if(strcmp(color[1], Db("\x04")) == 0) {
+                    color[1] = Db("\x05");
+                }
+            }
+        }
+
+        if(user.deathSCV[cp] == 1 || user.deathCavein[cp] > 0) {
+            //if(v.mouseX[cp] > 20 && v.mouseX[cp] < 205)
+            if(sys.clickedLine(2) || user.deathCavein[cp] == 1) {
+                v.s.printAt(2, "\x13\x1d(1)  \x07현재의 기억을 크리스탈에 새긴다");
+                if(sca.ConnectStatus() == 0) {
+                    PlayWAV("staredit\\wav\\Error.ogg");
+                    status.stats[cp] = status.SCA_ERROR;
+                }
+                else {
+                    PlayWAV("staredit\\wav\\click2.ogg");
+                    save.Save();
+                }
+            }
+            else if(sys.clickedLine(3) || user.deathCavein[cp] == 2) {
+                v.s.printAt(3, "\x13\x1d(2)  \x07다른 기억을 가져온다");
+                if(sca.ConnectStatus() == 0) {
+                    PlayWAV("staredit\\wav\\Error.ogg");
+                    status.stats[cp] = status.SCA_ERROR;  
+                }
+                else {
+                    PlayWAV("staredit\\wav\\click2.ogg");
+                }
+            }
+        }
+    }
+}
+
+function Open() {
+    const cp = getcurpl();
+    sys.CloseWindow();
+    crystal[cp] = 1;
+    if(IsUserCP()) {
+        color[0] = Db("\x05");
+        color[1] = Db("\x05");
+    }
+    mousePosition[cp] = 0;
+    screen.SetLight(25);
+    v.textRefresh[cp] = 1;
+}
+
+function Close() {
+    const cp = getcurpl();
+    sys.TextClear();
+    screen.SetLight(31);
+    crystal[cp] = 0;
+}

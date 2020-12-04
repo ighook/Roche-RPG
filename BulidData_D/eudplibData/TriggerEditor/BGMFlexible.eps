@@ -1,0 +1,69 @@
+const bgmlen = [0x41434040];
+const str = StringBuffer();
+function PlayOGG(bgmindex ,bgmcode, track){
+    SetMemoryEPD(str.epd, SetTo, bgmcode);
+    SetMemoryEPD(str.epd + 1, SetTo, track);
+    str.Play();
+
+    if (MemoryEPD(EPD(bgmlen) + bgmindex, Exactly, track)){
+        return 0;
+    }else{
+        return 1;
+    }
+}
+function loadSound(){
+EUDPlayerLoop()();
+    str.insert(0, '');
+    str.append('@@@@@@@@');
+EUDEndPlayerLoop();
+    MPQAddFile('@@@@@@@@', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st0.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@A', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st1.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@J', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st10.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@K', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st11.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@L', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st12.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@M', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st13.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@N', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st14.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@O', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st15.ogg', 'rb').read());
+    MPQAddFile('@@@@@@A@', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st16.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AA', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st17.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AB', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st18.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AC', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st19.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@B', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st2.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AD', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st20.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AE', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st21.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AF', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st22.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AG', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st23.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AH', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st24.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AI', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st25.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AJ', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st26.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AK', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st27.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AL', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st28.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AM', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st29.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@C', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st3.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AN', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st30.ogg', 'rb').read());
+    MPQAddFile('@@@@@@AO', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st31.ogg', 'rb').read());
+    MPQAddFile('@@@@@@B@', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st32.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BA', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st33.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BB', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st34.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BC', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st35.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BD', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st36.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BE', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st37.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BF', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st38.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BG', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st39.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@D', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st4.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BH', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st40.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BI', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st41.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BJ', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st42.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BK', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st43.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BL', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st44.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BM', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st45.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BN', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st46.ogg', 'rb').read());
+    MPQAddFile('@@@@@@BO', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st47.ogg', 'rb').read());
+    MPQAddFile('@@@@@@C@', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st48.ogg', 'rb').read());
+    MPQAddFile('@@@@@@CA', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st49.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@E', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st5.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@F', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st6.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@G', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st7.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@H', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st8.ogg', 'rb').read());
+    MPQAddFile('@@@@@@@I', py_open('C:/Users/ighook/Desktop/맵 제작/맵/D/BulidData_D/sound/BGM01/st9.ogg', 'rb').read());
+}

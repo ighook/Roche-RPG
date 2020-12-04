@@ -1,0 +1,88 @@
+import Variable as v;
+import System as sys;
+import NPC.NPC as npc;
+import User.Info as user;
+import Screen as screen;
+
+const color = PVariable();
+const mousePosition = PVariable();
+var text = Db("");
+
+function OpenConv();
+function CloseConv();
+
+function Guard() {
+    const cp = getcurpl();
+    if(v.key[cp] == 1) {
+        if(user.inMap[cp] == 1) {
+            if(sys.EPDBring(v.locNum[cp], npc.Guard[0]) || sys.EPDBring(v.locNum[cp], npc.Guard[1])) {
+                if(user.inConv[cp] == 0) OpenConv();
+                else CloseConv();
+            }
+        }
+    }
+    
+    if(user.inConv[cp] == 1) {
+        sys.Stop();
+        var x = 0;
+        if(v.screenMode[cp] == 1) x = 106;
+        if(v.textRefresh[cp] == 1) {
+            v.textRefresh[cp] = 0;
+            v.display.insert(0);
+            v.display.append("\x13──────────────────\n");
+            v.display.append("\x13\x1c[ 경비병 ]\n");
+            v.display.append(ptr2s(text));
+            v.display.append("\x13──────────────────\n");
+            v.display.append("\x13", ptr2s(color[cp]), "( C ) \x17대화 끝내기");
+        }
+        v.display.DisplayAt(0);
+        if(IsUserCP()) {
+            if(v._mouseY[cp] >= 176 && v._mouseY[cp] <= 190) {
+                if(v._mouseX[cp] >= 277 + x && v._mouseX[cp] <= 363 + x) {
+                    if(mousePosition[cp] != 1) {
+                        mousePosition[cp] = 1;
+                        color[cp] = Db("\x04");
+                        v.textRefresh[cp] = 1;
+                    }
+                }
+            }
+            else if(mousePosition[cp] == 1) {
+                mousePosition[cp] = 0;
+                color[cp] = Db("\x05");
+                v.textRefresh[cp] = 1;
+            }
+        }
+        if(v.mouse[cp] == v.KeyC) {
+            if(v.mouseY[cp] >= 176 && v.mouseY[cp] <= 190) {
+                if(v.mouseX[cp] >= 277 + x && v.mouseX[cp] <= 363 + x) {
+                    PlayWAV("staredit\\wav\\click2.ogg");
+                    CloseConv();
+                }
+            }
+        }
+    }
+}
+
+function OpenConv() {
+    const cp = getcurpl();
+    user.inConv[cp] = 1;
+    v.textRefresh[cp] = 1;
+    color[cp] = Db("\x05");
+    mousePosition[cp] = 0;
+    screen.light[cp] = 25;
+    if(IsUserCP()) {
+        var ran = dwrand() % 5;
+        if(ran == 0) text = Db("\x13\x04무슨 일입니까?\n");
+        else if(ran == 1) text = Db("\x13\x04밖은 위험하니 조심하십시오\n");
+        else if(ran == 2) text = Db("\x13\x04자신을 보호하기 위해선 좋은 장비는 필수입니다\n");
+        else if(ran == 3) text = Db("\x13\x04주민들을 보호하기 위하여 열심히 경계중입니다\n");
+        else if(ran == 4) text = Db("\x13\x04이 마을에 별일이 없었으면 좋겠군요\n");
+    }
+}
+
+function CloseConv() {
+    const cp = getcurpl();
+    user.inConv[cp] = 0;
+    sys.TextClear();
+    screen.light[cp] = 31;
+}

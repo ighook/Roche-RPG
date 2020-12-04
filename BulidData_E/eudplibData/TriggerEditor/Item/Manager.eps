@@ -1,0 +1,165 @@
+import User.Inventory as inven;
+import Item.Info.Potion as potion;
+import Item.Info.Weapon as weapon;
+import Item.Info.Armor as armor;
+import Variable as v;
+
+function AddItem(percent, type, index, amount, display);
+function RemoveItem(type, index, amount);
+function CheckEmptySlot();
+function CheckItemSlot(type_, index_);
+function CheckAlreadyHave(type, index);
+function FindItem(type, index, amount);
+
+function SetItemInfo() {
+	potion.SetItemInfo();
+	weapon.SetItemInfo();
+	armor.SetItemInfo();
+}
+
+function AddItem(percent, type, index, amount, display) {
+	const cp = getcurpl();
+	var ran = dwrand() % 10001;
+	var slot = 0;
+	var name = 0;
+	
+	// 확률 만족 시
+	if(ran < percent) {	
+		if(CheckAlreadyHave(type, index)) {
+			slot = CheckItemSlot(type, index);
+		}
+		else slot = CheckEmptySlot();
+        if(slot == 25) {
+            v.s.print("\x04인벤토리에 자리가 없습니다");
+            return;
+        }
+
+		const c = inven.Inven.cast(inven.inven[24 * cp + slot]);
+		if(type == 1) {
+			if(index > 5) return;
+			const p = potion.Potion.cast(potion.potionList[index - 1]);
+			c.type = p.type;
+			c.index = index;
+			c.name = p.name;
+			c.value1 = p.value;
+			c.amount += amount;
+			c.explain = p.explain;
+		}
+		else if(type == 2) {
+			const w = weapon.Weapon.cast(weapon.weaponList[index - 1]);
+			c.type = w.type;
+			c.index = index;
+			c.lv = w.lv;
+			c.name = w.name;
+			c.amount += amount;
+		}
+		else if(type == 3) {
+			if(index > 5) return;
+			const a = armor.Armor.cast(armor.armorList[index - 1]);
+			c.type = a.type;
+			c.index = index;
+			c.lv = a.lv;
+			c.name = a.name;
+			c.amount += amount;
+			c.value1 = a.defense;
+		}
+		else return;
+
+		if(display == true) {
+			//v.s.print("\x04", slot, " 번 슬롯에 ", ptr2s(c.name), " 등록");
+			v.s.print("\x04[", ptr2s(c.name), "] 을 얻었습니다");
+		}
+        v.textRefresh[cp] = 1;
+	}
+}
+
+function RemoveItem(type, index, amount) {
+	const cp = getcurpl();
+	const t = cp * 24;
+	var slot = 0;
+	
+	// 타입과 인덱스가 일치하는 슬롯을 탐색
+	slot = CheckItemSlot(type, index);
+	
+	// 해당 슬롯의 배열을 가져옴
+	const c = inven.Inven.cast(inven.inven[t + slot]);
+	
+	// 이름을 가져옴
+	var name = c.name;
+	
+	// 삭제하려는 수가 보유 수 보다 많을 경우
+	if(c.amount < amount) {
+		v.s.print("\x08Error");
+		return;
+	}
+	
+	if(type == 1) {
+		//if(index <= 15 && index == user.regPtnHP[cp]) user.remainPtnHP[cp] -= 1;
+		//if(index >= 16 && index == user.regPtnMP[cp]) user.remainPtnMP[cp] -= 1;
+	}
+	else if(type == 2) {
+
+	}
+	c.amount -= amount;
+	
+	if(c.amount == 0) {
+		c.type = 0;
+		c.index = 0;
+		c.name = Db("\x05Empty");
+		c.explain = Db("");
+		inven.Sort();
+	}
+	v.textRefresh[cp] = 1;
+	//v.s.print("\x07◈ \x04", ptr2s(name), " \x19", amount, " \x04개 잃음");
+}
+
+function CheckEmptySlot() {
+	const cp = getcurpl();
+	const t = cp * 24;
+	
+	for(var i = 0; i < 24; i++) {
+		const c = inven.Inven.cast(inven.inven[t + i]);
+		if(c.type == 0 && c.index == 0) {
+			return i;
+		}
+	}
+    return 25;
+}
+
+function CheckItemSlot(type_, index_) {
+	const cp = getcurpl();
+	const t = cp * 24;
+	for(var i = 0; i < 24; i++) {
+		const c = inven.Inven.cast(inven.inven[t + i]);
+		if(c.type == type_) {
+			if(c.index == index_) {
+				return i;
+			}
+		}
+	}
+}
+
+function CheckAlreadyHave(type, index) {
+	const cp = getcurpl();
+	const t = cp * 24;
+	for(var i = 0; i < 24; i++) {
+		const c = inven.Inven.cast(inven.inven[t + i]);
+		if(c.type == type && c.index == index) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function FindItem(type, index, amount) {
+	const cp = getcurpl();
+	const t = 24 * cp;
+	for(var i = 0; i < 24; i++)
+	{
+		const c = inven.Item_.cast(inven.inven[t + i]);
+		if(c.type == type && c.index == index && c.amount >= amount)
+		{
+			return true;
+		}
+	}
+}

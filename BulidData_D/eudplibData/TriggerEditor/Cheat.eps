@@ -1,0 +1,36 @@
+import MSQCVariable as mv;
+import Variable as v;
+import Item.Manager as item;
+
+function Cheat() {
+    const cp = getcurpl();
+    if(MemoryEPD(EPD(v.chatPattern) + cp, Exactly, 1)) {
+        v.s.print("길이 : ", dwread_epd(EPD(v.chatLen) + cp));
+        v.s.print("패턴 : ", dwread_epd(EPD(v.chatPattern) + cp));
+
+        const itemCode = Db(5);
+        memcpy(itemCode, dwread_epd(EPD(v.chatAddr) + cp) + 4, 5); // addr의 4바이트 길이만큼의 내용을 num에 복사
+        var code, d = parse(itemCode, radix=10); // 정수와 자릿수 반환, 숫자가 아니면 0 반환
+        v.s.print("\x04code : ", code);
+        var type = code / 10000;
+        if(type > 3) return;
+        code -= type * 10000;
+        var index = code / 100;
+        code -= index * 100;
+        var amount = code;
+
+        v.s.print("\x17type \x04: ", type, "  \x17index \x04: ", index, "  \x17amount \x04: ", amount);
+        item.AddItem(10000, type, index, amount, true);
+    }
+    /*if(MemoryEPD(EPD(v.chatPattern) + cp, Exactly, 1)) {
+        const itemCode = Db(5);
+        memcpy(itemCode, v.chatAddr, 5); // addr의 4바이트 길이만큼의 내용을 num에 복사
+        var code, d = parse(itemCode, radix=10); // 정수와 자릿수 반환, 숫자가 아니면 0 반환
+        var type = code / 10000;
+        code -= type * 10000;
+        var index = code / 100;
+        code -= index * 100;
+        var amount = code;
+        item.AddItem(10000, type, index, amount, true);
+    }*/
+}

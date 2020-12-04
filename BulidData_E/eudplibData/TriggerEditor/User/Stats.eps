@@ -1,0 +1,37 @@
+import User.Info as user;
+import Variable as v;
+import System as sys;
+
+function SetDamage() {
+    const cp = getcurpl();
+    var increase = 0;
+	for(var i = 0; i < user.level[cp]; i++)
+		increase += v.increaseDmg[user.level[cp] - 1];
+	var amountDmg = user.physDmg[cp] + increase + user.weaponPhyDmg[cp];
+	wwrite(0x6564E0 + 2512 + cp * 2, amountDmg);
+    //SetMemoryXEPD(209619, SetTo, amountDmg, 0xFFFF);
+}
+
+function SetHP() {
+	const cp = getcurpl();
+	var increase = 0;
+	for(var i = 0; i < user.level[cp]; i++)
+		increase += v.increaseHP[user.level[cp] - 1];
+	var amountHP = v.defaultHP + increase;
+	user.maxHP[cp] = amountHP;
+	sys.SetMaxHP();
+}
+
+function RefreshExp() {
+	const cp = getcurpl();
+	settbl2(1303 + cp, 8, "\x0D\x0D\x0D\x0D\x0D\x0D");
+	settbl2(1303 + cp, 8, user.exp[cp]);
+	settbl2(1303 + cp, 19, "\x0D\x0D\x0D\x0D\x0D\x0D");
+	settbl2(1303 + cp, 19, v.maxExp[user.level[cp]]);
+}
+
+function SetDefense() {
+	const cp = getcurpl();
+	var amountDef = user.armorDefense[cp];
+	bwrite(0x65FD00 + 456 + v.unitNum[cp], amountDef);
+}

@@ -1,0 +1,146 @@
+import TriggerEditor.SCArchive as sca;
+import System as sys;
+import Variable as v;
+import Screen as screen;
+import Opening as opening;
+import User.Info as user;
+import Potal as potal;
+import Inventory as inven;
+import Equip as equip;
+import Box as box;
+import StatusBar as status;
+import Monster.Spawn as spawn;
+import Monster.Kill as kill;
+import timeline as tL;
+import TriggerEditor.BGMPlayer as bgm;
+import Crack as crack;
+import User.ClickedUnit as unit;
+import KeyDetect as key;
+import ChatDetect as chat;
+import Cheat as cheat;
+import NPC.Guard as guard;
+import SCA.Data as data;
+import SCA.Slot as slot;
+import SCA.Save as save;
+import SCA.MemoryCrystal as memory;
+import User.Character as char;
+import MSQCVariable;
+
+const wideCheck = PVariable();
+
+function MoveCivilian();
+
+function onPluginStart() {
+    randomize();
+    sca.Init();
+    sys.Init();
+    sca.SetUseDefaultMessage(0);
+    //EUDRegisterObjectToNamespace("screen", v.screen);
+    EUDRegisterObjectToNamespace("KeyD", v.KeyD);
+    EUDRegisterObjectToNamespace("KeyF", v.KeyF);
+    EUDRegisterObjectToNamespace("KeyG", v.KeyG);
+    EUDRegisterObjectToNamespace("KeyH", v.KeyH);
+    
+    //sys.UDPBan(); // UDP 방지
+    //sys.SpeedBan(); // 방제 배속 방지
+    //crack.Init();
+    bgm.loadSound();
+
+    // 시민 생성
+    // for(var i = 0; i < 10; i++) {
+    //     var civilian = sys.SetNextUnitEPD();
+    //     setloc("temp", 495, 350);
+    //     CreateUnit(1, 15, "temp", P7);
+    //     // 정야독
+    //     SetMemoryXEPD(civilian + 0x4D / 4, SetTo, 187 << 8, 0xFF00);
+    // }
+    
+    // if(MemoryEPD(EPD(0x57F0B4), Exactly, 0)) {
+    //     v.s.print("싱글입니다.");
+    //     dwread(0);
+    // }
+
+    foreach (cp : EUDLoopPlayer()) {
+        setcurpl(cp);
+        bgm.SetBGM(0);
+        //sys.SetName();
+        status.stats[cp] = status.USER_STATUS;
+        if(sys.single == false) screen.WideCheck();
+        char.NewCharacter();
+    }
+    
+    //setcurpl(6);
+    //RunAIScriptAt("Turn ON Shared Vision for Player 1", "Field1");
+}
+
+function beforeTriggerExec() {
+    sca.Exec();
+    //crack.BeforeExec();
+    //spawn.Spawn();
+    sys.AllyCheck();
+    foreach (cp : EUDLoopPlayer()) {
+        setcurpl(cp);
+        bgm.Play();
+        sys.GetDeath();
+        sys.GetMousePos();
+        cheat.Cheat();
+
+        if(user.isAlive[cp] == 1) {
+            user.posX[cp], user.posY[cp] = dwbreak(dwread_epd(user.character[cp] + 0x28 / 4))[[0,1]];
+        }
+
+        /*if(v.started[cp] == 0) {
+            opening.Opening();
+            slot.New();
+        }*/
+
+        if(user.isAlive[cp] == 1) {
+            if(MemoryXEPD(user.character[cp] + 0x4D / 4, Exactly, 3 << 8, 0xFF00)) {
+                SetMemoryXEPD(user.character[cp] + 0x4D / 4, SetTo, 107 << 8 , 0xFF00);
+            }
+        }
+
+        guard.Guard();
+        
+        status.StatusBar(); // 상태바
+        screen.LightCheck(); // 밝기 조절
+        potal.PotalCheck(); // 포탈 이동
+        sys.PlayerLoc(); // 플레이어 로케이션
+        sys.ExpCheck(); // 경험치 변동 체크
+        kill.KillCheck(); // 플레이어 킬 체크
+
+        inven.Inventory(); // 인벤토리
+        equip.Equip(); // 장비
+
+        //box.OpenBox(); // 상자
+        memory.MemoryCrystal(); // 저장 크리스탈
+        save.SaveCheck(); // 저장
+
+        key.KeyDetect(cp);
+        chat.ChatDetect(cp);
+        screen.WideCheckExec();
+
+        
+    }
+    unit.clickedUnit();
+    /*SetMemory(0x6509B0, SetTo, EPD(0x59CCA8) + 0xC/4);
+	EUDLoopN()(1700);
+	EUDContinueIf(Deaths(CurrentPlayer, Exactly, 0, 0));
+	SetMemory(0x6509B0, Add, (0x64-0xC)/4);
+    
+	SetMemory(0x6509B0, Subtract, (0x64-0xC)/4);
+	EUDSetContinuePoint();
+	SetMemory(0x6509B0, Add, 84);
+	EUDEndLoopN();*/
+
+    SetMemory(0x5124F0, SetTo, 28);
+}
+
+function afterTriggerExec() {
+    //crack.AfterExec();
+    foreach (cp : EUDLoopPlayer()) {
+        setcurpl(cp);
+        //bgm.Play();
+    }
+}
+

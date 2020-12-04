@@ -1,0 +1,28 @@
+import Item.Weapon as weapon;
+
+object Weapon { var type; var index; var lv; var name; var phyDmg; var magicDmg; };
+object Helmet { var type; var index; var lv; var name; var hp; var defense; };
+object Armor { var type; var index; var lv; var name; var hp; var defense; };
+object Glove { var type; var index; var lv; var name; var hp; var defense; };
+object Cape { var type; var index; var lv; var name; var hp; var mp; var defense; };
+object Ring { var type; var index; var lv; var name; var hp; var defense; };
+object Necklace { var type; var index; var lv; var name; var hp; var defense; };
+
+const equip = EUDArray(7 * 8);
+
+function EquipWeapon(index) {
+    const cp = getcurpl();
+    const w1 = weapon.Weapon.cast(weapon.weaponList[index - 1]);
+    
+    if(user.level[cp] < w1.lv) {
+        v.s.print("레벨이 부족합니다");
+        return;
+    }
+
+    const w2 = Weapon.cast(equip[7 * cp + 0]);
+    w2.index = w1.index;
+    w2.phyDmg = w1.phyDmg;
+    w2.magicDmg = w1.magicDmg;
+    w2.name = w1.name;
+    user.equipedWeapon[cp] = index;
+}

@@ -1,0 +1,29 @@
+import System as sys;
+import NPC.NPC as npc;
+
+const Guard = EUDArray(10);
+var Lia = 0;
+
+function CreateNPC() {
+    /*npc.Lia = epdread_epd(EPD(0x628438));
+	// 그래픽 사라케리건으로 변경
+    SetMemoryXEPD(EPD(0x664507), SetTo, 77 << 24, 0xFF000000);
+    setloc("temp", 570, 288);
+	CreateUnitWithProperties(1, "Terran Civilian", "temp", P7, UnitProperty(invincible = true));
+	bwrite(0x65FD00 + 18424 + 15 * 1, 71);
+	sys.SetUnitColorEPD(Lia, 8);
+	//sys.StructSetMemoryXEPD(Lia, 0x026, 1, SetTo);
+    SetMemoryXEPD(Lia + 0x26 / 4, SetTo, 1 * 65536, 0xFF0000); // 0x26 리아 - 1*/
+
+	Guard[0] = epdread_epd(EPD(0x628438));
+	// 그래픽 마린으로 변경
+	SetMemoryXEPD(EPD(0x664507), SetTo, 78 << 24, 0xFF000000);
+	setloc("temp", 852, 344);
+	CreateUnitWithProperties(1, "Terran Civilian", "temp", P7, UnitProperty(invincible = true));
+	SetMemoryXEPD(npc.Guard[0] + 0x26 / 4, SetTo, 2 * 65536, 0xFF0000); // 0x26 경비병 - 2
+
+	Guard[1] = epdread_epd(EPD(0x628438));
+	setloc("temp", 852, 470);
+	CreateUnitWithProperties(1, "Terran Civilian", "temp", P7, UnitProperty(invincible = true));
+	SetMemoryXEPD(npc.Guard[1] + 0x26 / 4, SetTo, 2 * 65536, 0xFF0000); // 0x26 경비병 - 2
+}

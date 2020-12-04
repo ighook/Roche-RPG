@@ -1,0 +1,41 @@
+const drawed = 0;
+
+function CreateTree(x, y);
+
+function DrawVillage() {
+    if(drawed == 1) return;
+    CreateTree(273, 240);
+    CreateTree(360, 224);
+    CreateTree(271, 496);
+    CreateTree(408, 501);
+    CreateTree(423, 329);
+    SetVariables(drawed, 1);
+}
+
+function Remove() {
+    
+}
+
+function CreateTree(x, y) {
+    setloc("temp", x, y);
+    var ran = dwrand() % 4;
+    if(ran == 0) {
+        wwrite(0x665AC0 + 1696 + 493 * 2, 624);
+        CreateUnit(1, "Cave", "temp", P7);
+    }
+    else if(ran == 1) {
+        wwrite(0x665AC0 + 1696 + 493 * 2, 634);
+        addloc("t2", -17, 0);
+        CreateUnit(1, "Cave", "temp", P7);
+    }
+    else if(ran == 2) {
+        addloc("t3", -16, 0);
+        wwrite(0x665AC0 + 1696 + 493 * 2, 638);
+        CreateUnit(1, "Cave", "temp", P7);
+    }
+    else if(ran == 3) {
+        addloc("t4", -7, 9);
+        wwrite(0x665AC0 + 1696 + 493 * 2, 630);
+        CreateUnit(1, "Cave", "temp", P7);
+    }
+}
